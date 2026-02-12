@@ -12,7 +12,7 @@ import datetime
 # Streamlit layout options: "centered" (default) or "wide".
 # - "centered": コンテンツ幅が中央に固定されます（デフォルト）。
 # - "wide": ページ幅いっぱいに広がります。
-st.set_page_config(page_title="性格タイプ診断", layout="wide")
+st.set_page_config(page_title="性格タイプ診断", layout="centered")
 
 # CSSによるデザイン調整
 st.markdown("""
