@@ -399,6 +399,10 @@ if 'answers' not in st.session_state:
     # 全質問の初期値を0（中立）に設定
     for i in range(len(questions_data)):
         st.session_state.answers[i] = 0
+if 'gender_input' not in st.session_state:
+    st.session_state.gender_input = "回答しない"
+if 'scroll_to_top' not in st.session_state:
+    st.session_state.scroll_to_top = False
 
 
 def log_session_state(event: str):
@@ -620,10 +624,13 @@ def main():
         st.info("以下の質問に対し、あなたの感覚に最も近いものを選択してください。")
         st.markdown("<div class='gender-section'>", unsafe_allow_html=True)
         st.markdown("### 👤 基本情報")
-        st.session_state.gender_input = st.radio(
-            "性別（任意）", 
-            ["男性", "女性", "その他", "回答しない"], 
-            horizontal=True
+        # 性別ラジオに安定したkeyを付与してセッション間で維持されるようにする
+        st.radio(
+            "性別（任意）",
+            ["男性", "女性", "その他", "回答しない"],
+            horizontal=True,
+            key="gender_input",
+            label_visibility="collapsed"
         )
         st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("---")
