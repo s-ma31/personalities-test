@@ -709,8 +709,8 @@ def main():
         with col_center:
             # 最終ページ判定を優先（1ページ構成のときはここを通る）
             if is_last_page:
-                btns = st.columns(2)
-                with btns[0]:
+                b1, _sp, b2 = st.columns([1, 0.2, 1])
+                with b1:
                     if st.form_submit_button("＜ 前へ", use_container_width=True):
                         for q in current_questions:
                             st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
@@ -718,7 +718,7 @@ def main():
                         st.session_state.page -= 1
                         log_session_state("prev_page")
                         st.rerun()
-                with btns[1]:
+                with b2:
                     if st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=True):
                         for q in current_questions:
                             st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
@@ -738,8 +738,8 @@ def main():
                     st.rerun()
 
             else:
-                btns = st.columns(2)
-                with btns[0]:
+                b1, _sp, b2 = st.columns([1, 0.2, 1])
+                with b1:
                     if st.form_submit_button("＜ 前へ", use_container_width=True):
                         for q in current_questions:
                             st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
@@ -747,7 +747,7 @@ def main():
                         st.session_state.page -= 1
                         log_session_state("prev_page")
                         st.rerun()
-                with btns[1]:
+                with b2:
                     if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
                         for q in current_questions:
                             st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
