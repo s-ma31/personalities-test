@@ -192,11 +192,27 @@ st.markdown("""
     div[data-testid="stForm"] button[type="submit"],
     div[data-testid="stForm"] button[kind="primaryFormSubmit"],
     div[data-testid="stForm"] button[kind="secondaryFormSubmit"] {
-        display: block !important;
-        margin-left: auto !important;
-        margin-right: auto !important;
-        width: fit-content !important;
+        display: inline-block !important;
         min-width: 180px !important;
+    }
+    
+    /* ボタンの親コンテナに text-align: center を適用 */
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] {
+        text-align: center !important;
+        width: 100% !important;
+    }
+    
+    /* より上位の親にも適用 */
+    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] > div {
+        text-align: center !important;
+        display: block !important;
+        width: 100% !important;
+    }
+    
+    /* stBaseButton-secondaryFormSubmit コンテナ */
+    div[data-testid="stForm"] div[class*="stBaseButton"] {
+        text-align: center !important;
+        width: 100% !important;
     }
     
     /* テキストラベルの色 */
@@ -706,6 +722,39 @@ def main():
         st.markdown("<br>", unsafe_allow_html=True)
         
         is_last_page = (st.session_state.page == TOTAL_PAGES - 1)
+        
+        # JavaScriptでボタンを中央配置（components.htmlを使用）
+        components.html("""
+        <script>
+            function centerButtons() {
+                const doc = window.parent.document;
+                const buttons = doc.querySelectorAll('button[kind="primaryFormSubmit"], button[kind="secondaryFormSubmit"]');
+                buttons.forEach(function(btn) {
+                    // ボタン自体のスタイル
+                    btn.style.display = 'block';
+                    btn.style.marginLeft = 'auto';
+                    btn.style.marginRight = 'auto';
+                    
+                    // 親要素を遡ってスタイル適用
+                    let parent = btn.parentElement;
+                    for (let i = 0; i < 10; i++) {
+                        if (parent && parent.tagName !== 'FORM') {
+                            parent.style.display = 'flex';
+                            parent.style.justifyContent = 'center';
+                            parent.style.width = '100%';
+                            parent = parent.parentElement;
+                        } else {
+                            break;
+                        }
+                    }
+                });
+            }
+            // 複数回実行して確実に適用
+            setTimeout(centerButtons, 100);
+            setTimeout(centerButtons, 500);
+            setTimeout(centerButtons, 1000);
+        </script>
+        """, height=0)
         
         if is_last_page:
             submitted = st.form_submit_button("診断結果を見る ＞", type="primary")
