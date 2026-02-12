@@ -188,10 +188,22 @@ st.markdown("""
         margin: 0 auto;
     }
     
-    /* フォーム送信ボタンの中央配置を強制 */
+    /* フォーム送信ボタンの中央配置を強制（Streamlit Cloud対応） */
     div[data-testid="stForm"] button {
         margin-left: auto !important;
         margin-right: auto !important;
+    }
+    
+    /* ボタンコンテナ全体を中央寄せ */
+    div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
+        justify-content: center !important;
+    }
+    
+    /* フォーム送信ボタンのスタイル強化 */
+    div[data-testid="stForm"] button[kind="secondaryFormSubmit"],
+    div[data-testid="stForm"] button[kind="primaryFormSubmit"] {
+        min-width: 140px !important;
+        max-width: 200px !important;
     }
     
     /* テキストラベルの色 */
@@ -703,33 +715,27 @@ def main():
         is_first_page = (st.session_state.page == 0)
         is_last_page = (st.session_state.page == TOTAL_PAGES - 1)
         
-        # ボタンを中央配置（Cloud対応）
-        col_left, col_center, col_right = st.columns([2, 3, 2])
-        
-        with col_center:
-            # 最終ページ判定を優先（1ページ構成のときはここを通る）
-            if is_last_page:
-                b1, _sp, b2 = st.columns([1, 0.2, 1])
-                with b1:
-                    if st.form_submit_button("＜ 前へ", use_container_width=False):
-                        for q in current_questions:
-                            st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                        st.session_state['scroll_to_top'] = True
-                        st.session_state.page -= 1
-                        log_session_state("prev_page")
-                        st.rerun()
-                with b2:
-                    if st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=False):
-                        for q in current_questions:
-                            st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                        st.session_state.finished = True
-                        st.session_state['scroll_to_top'] = True
-                        log_session_state("finished")
-                        st.rerun()
+        # ボタンを中央配置（Streamlit Cloud対応：シンプル構造）
+        # 最終ページ判定を優先（1ページ構成のときはここを通る）
+        if is_last_page:
+            # 中央寄せ用のHTML
+            st.markdown("<div style='display:flex; justify-content:center; gap:20px;'>", unsafe_allow_html=True)
+            col1, col2, col3 = st.columns([3, 2, 3])
+            with col2:
+                submitted = st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=True)
+                if submitted:
+                    for q in current_questions:
+                        st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
+                    st.session_state.finished = True
+                    st.session_state['scroll_to_top'] = True
+                    log_session_state("finished")
+                    st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 
-            elif is_first_page:
-                if st.form_submit_button("次へ ＞", type="primary", use_container_width=False):
-                    # ページ送り時に値を確定保存
+        elif is_first_page:
+            col1, col2, col3 = st.columns([3, 2, 3])
+            with col2:
+                if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
                     for q in current_questions:
                         st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
                     st.session_state['scroll_to_top'] = True
@@ -737,24 +743,16 @@ def main():
                     log_session_state("next_page")
                     st.rerun()
 
-            else:
-                b1, _sp, b2 = st.columns([1, 0.2, 1])
-                with b1:
-                    if st.form_submit_button("＜ 前へ", use_container_width=False):
-                        for q in current_questions:
-                            st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                        st.session_state['scroll_to_top'] = True
-                        st.session_state.page -= 1
-                        log_session_state("prev_page")
-                        st.rerun()
-                with b2:
-                    if st.form_submit_button("次へ ＞", type="primary", use_container_width=False):
-                        for q in current_questions:
-                            st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                        st.session_state['scroll_to_top'] = True
-                        st.session_state.page += 1
-                        log_session_state("next_page")
-                        st.rerun()
+        else:
+            col1, col2, col3 = st.columns([3, 2, 3])
+            with col2:
+                if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
+                    for q in current_questions:
+                        st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
+                    st.session_state['scroll_to_top'] = True
+                    st.session_state.page += 1
+                    log_session_state("next_page")
+                    st.rerun()
 
 if __name__ == "__main__":
     main()
