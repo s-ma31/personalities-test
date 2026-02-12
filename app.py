@@ -711,7 +711,7 @@ def main():
             if is_last_page:
                 b1, _sp, b2 = st.columns([1, 0.2, 1])
                 with b1:
-                    if st.form_submit_button("＜ 前へ", use_container_width=True):
+                    if st.form_submit_button("＜ 前へ", use_container_width=False):
                         for q in current_questions:
                             st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
                         st.session_state['scroll_to_top'] = True
@@ -719,7 +719,7 @@ def main():
                         log_session_state("prev_page")
                         st.rerun()
                 with b2:
-                    if st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=True):
+                    if st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=False):
                         for q in current_questions:
                             st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
                         st.session_state.finished = True
@@ -728,7 +728,7 @@ def main():
                         st.rerun()
 
             elif is_first_page:
-                if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
+                if st.form_submit_button("次へ ＞", type="primary", use_container_width=False):
                     # ページ送り時に値を確定保存
                     for q in current_questions:
                         st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
@@ -740,7 +740,7 @@ def main():
             else:
                 b1, _sp, b2 = st.columns([1, 0.2, 1])
                 with b1:
-                    if st.form_submit_button("＜ 前へ", use_container_width=True):
+                    if st.form_submit_button("＜ 前へ", use_container_width=False):
                         for q in current_questions:
                             st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
                         st.session_state['scroll_to_top'] = True
@@ -748,7 +748,7 @@ def main():
                         log_session_state("prev_page")
                         st.rerun()
                 with b2:
-                    if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
+                    if st.form_submit_button("次へ ＞", type="primary", use_container_width=False):
                         for q in current_questions:
                             st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
                         st.session_state['scroll_to_top'] = True
