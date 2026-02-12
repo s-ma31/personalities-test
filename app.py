@@ -723,56 +723,26 @@ def main():
         
         is_last_page = (st.session_state.page == TOTAL_PAGES - 1)
         
-        # JavaScriptでボタンを中央配置（components.htmlを使用）
-        components.html("""
-        <script>
-            function centerButtons() {
-                const doc = window.parent.document;
-                const buttons = doc.querySelectorAll('button[kind="primaryFormSubmit"], button[kind="secondaryFormSubmit"]');
-                buttons.forEach(function(btn) {
-                    // ボタン自体のスタイル
-                    btn.style.display = 'block';
-                    btn.style.marginLeft = 'auto';
-                    btn.style.marginRight = 'auto';
-                    
-                    // 親要素を遡ってスタイル適用
-                    let parent = btn.parentElement;
-                    for (let i = 0; i < 10; i++) {
-                        if (parent && parent.tagName !== 'FORM') {
-                            parent.style.display = 'flex';
-                            parent.style.justifyContent = 'center';
-                            parent.style.width = '100%';
-                            parent = parent.parentElement;
-                        } else {
-                            break;
-                        }
-                    }
-                });
-            }
-            // 複数回実行して確実に適用
-            setTimeout(centerButtons, 100);
-            setTimeout(centerButtons, 500);
-            setTimeout(centerButtons, 1000);
-        </script>
-        """, height=0)
-        
-        if is_last_page:
-            submitted = st.form_submit_button("診断結果を見る ＞", type="primary")
-            if submitted:
-                for q in current_questions:
-                    st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                st.session_state.finished = True
-                st.session_state['scroll_to_top'] = True
-                log_session_state("finished")
-                st.rerun()
-        else:
-            if st.form_submit_button("次へ ＞", type="primary"):
-                for q in current_questions:
-                    st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                st.session_state['scroll_to_top'] = True
-                st.session_state.page += 1
-                log_session_state("next_page")
-                st.rerun()
+        # st.columnsで物理的に中央配置
+        _, btn_col, _ = st.columns([2, 1, 2])
+        with btn_col:
+            if is_last_page:
+                submitted = st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=True)
+                if submitted:
+                    for q in current_questions:
+                        st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
+                    st.session_state.finished = True
+                    st.session_state['scroll_to_top'] = True
+                    log_session_state("finished")
+                    st.rerun()
+            else:
+                if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
+                    for q in current_questions:
+                        st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
+                    st.session_state['scroll_to_top'] = True
+                    st.session_state.page += 1
+                    log_session_state("next_page")
+                    st.rerun()
 
 if __name__ == "__main__":
     main()
