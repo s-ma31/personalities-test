@@ -174,11 +174,24 @@ st.markdown("""
     header {visibility: hidden;}
     
     /* ボタン調整 */
+    /* ボタン調整・中央寄せ */
+    .stButton {
+        display: flex;
+        justify-content: center;
+    }
     .stButton button {
         width: 100%;
+        max-width: 320px;
         font-weight: bold;
         padding: 10px 0;
         border-radius: 20px;
+        margin: 0 auto;
+    }
+    
+    /* フォーム送信ボタンの中央配置を強制 */
+    div[data-testid="stForm"] button {
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
     
     /* テキストラベルの色 */
@@ -658,29 +671,24 @@ def main():
                 st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
             with c2:
                 # ==================================================
-                # 【重要修正】Cloudでの値リセットを防ぐための同期処理
+                # 【Streamlit Cloud対応】値の記憶を確実にする
                 # ==================================================
                 key_radio = f"radio_{q['id']}"
                 saved_val = st.session_state.answers.get(q['id'], 0)
                 
-                # もしセッションステートからキーが消えていたら（リセットされていたら）、
-                # 保存されている answers の値で強制的に復元する
-                if key_radio not in st.session_state:
-                    st.session_state[key_radio] = saved_val
-
-                # ラジオボタンの表示
-                st.radio(
+                # ラジオボタンの表示（indexで初期値を明示）
+                current_value = st.radio(
                     f"質問 {q['id']}",
                     options,
-                    # indexは念のため指定するが、実質は上のsession_stateへの代入が優先される
+                    index=options.index(saved_val),  # 保存された値のインデックスを指定
                     horizontal=True,
                     format_func=lambda x: "",
                     label_visibility="collapsed",
                     key=key_radio
                 )
                 
-                # 表示した後、念のため answers にも今の値を書き戻しておく
-                st.session_state.answers[q['id']] = st.session_state.get(key_radio, 0)
+                # 即座にanswersに保存
+                st.session_state.answers[q['id']] = current_value
                 # ==================================================
 
             with c3:
@@ -690,12 +698,14 @@ def main():
 
         # --- ボタン配置エリア (中央寄せ) ---
         st.markdown("<br>", unsafe_allow_html=True)
-        b_col1, b_col2, b_col3 = st.columns([1, 2, 1])
         
         is_first_page = (st.session_state.page == 0)
         is_last_page = (st.session_state.page == TOTAL_PAGES - 1)
         
-        with b_col2:
+        # ボタンを中央配置（Cloud対応）
+        col_left, col_center, col_right = st.columns([2, 3, 2])
+        
+        with col_center:
             if is_first_page:
                 if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
                     # ページ送り時に値を確定保存
