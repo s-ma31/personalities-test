@@ -12,7 +12,7 @@ import datetime
 # Streamlit layout options: "centered" (default) or "wide".
 # - "centered": コンテンツ幅が中央に固定されます（デフォルト）。
 # - "wide": ページ幅いっぱいに広がります。
-st.set_page_config(page_title="性格タイプ診断", layout="centered")
+st.set_page_config(page_title="性格タイプ診断", layout="wide")
 
 # CSSによるデザイン調整
 st.markdown("""
@@ -188,41 +188,15 @@ st.markdown("""
         margin: 0 auto;
     }
     
-    /* フォーム送信ボタンの中央配置を強制（Streamlit Cloud対応） */
-    div[data-testid="stForm"] button {
+    /* フォーム送信ボタンの中央配置 - Streamlit Cloud対応 */
+    div[data-testid="stForm"] button[type="submit"],
+    div[data-testid="stForm"] button[kind="primaryFormSubmit"],
+    div[data-testid="stForm"] button[kind="secondaryFormSubmit"] {
+        display: block !important;
         margin-left: auto !important;
         margin-right: auto !important;
-    }
-    
-    /* ボタンコンテナ全体を中央寄せ */
-    div[data-testid="stForm"] div[data-testid="stHorizontalBlock"] {
-        justify-content: center !important;
-    }
-    
-    /* フォーム送信ボタンのスタイル強化 */
-    div[data-testid="stForm"] button[kind="secondaryFormSubmit"],
-    div[data-testid="stForm"] button[kind="primaryFormSubmit"] {
-        min-width: 140px !important;
-        max-width: 200px !important;
-    }
-    
-    /* フォームの最後の要素（ボタン）を中央配置 - Streamlit Cloud対応強化 */
-    div[data-testid="stForm"] > div[data-testid="stVerticalBlockBorderWrapper"] > div > div[data-testid="stVerticalBlock"] > div:last-child {
-        display: flex !important;
-        justify-content: center !important;
-    }
-    
-    /* ボタンの親要素全てにflexbox中央配置を適用 */
-    div[data-testid="stForm"] div[data-testid="stElementContainer"]:has(button) {
-        display: flex !important;
-        justify-content: center !important;
-    }
-    
-    /* フォーム内の全ての直接子要素に中央配置 */
-    div[data-testid="stForm"] > div > div > div > div:has(button[kind="primaryFormSubmit"]) {
-        display: flex !important;
-        justify-content: center !important;
-        width: 100% !important;
+        width: fit-content !important;
+        min-width: 180px !important;
     }
     
     /* テキストラベルの色 */
@@ -732,27 +706,6 @@ def main():
         st.markdown("<br>", unsafe_allow_html=True)
         
         is_last_page = (st.session_state.page == TOTAL_PAGES - 1)
-        
-        # ボタンを中央配置（Streamlit Cloud対応：JavaScript強制適用）
-        st.markdown("""
-        <script>
-            // ボタンの親要素を中央配置に強制変更
-            setTimeout(function() {
-                const buttons = window.parent.document.querySelectorAll('button[kind="primaryFormSubmit"], button[kind="secondaryFormSubmit"]');
-                buttons.forEach(function(btn) {
-                    let parent = btn.parentElement;
-                    for (let i = 0; i < 5; i++) {
-                        if (parent) {
-                            parent.style.display = 'flex';
-                            parent.style.justifyContent = 'center';
-                            parent.style.width = '100%';
-                            parent = parent.parentElement;
-                        }
-                    }
-                });
-            }, 100);
-        </script>
-        """, unsafe_allow_html=True)
         
         if is_last_page:
             submitted = st.form_submit_button("診断結果を見る ＞", type="primary")
