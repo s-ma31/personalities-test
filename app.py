@@ -206,6 +206,25 @@ st.markdown("""
         max-width: 200px !important;
     }
     
+    /* フォームの最後の要素（ボタン）を中央配置 - Streamlit Cloud対応強化 */
+    div[data-testid="stForm"] > div[data-testid="stVerticalBlockBorderWrapper"] > div > div[data-testid="stVerticalBlock"] > div:last-child {
+        display: flex !important;
+        justify-content: center !important;
+    }
+    
+    /* ボタンの親要素全てにflexbox中央配置を適用 */
+    div[data-testid="stForm"] div[data-testid="stElementContainer"]:has(button) {
+        display: flex !important;
+        justify-content: center !important;
+    }
+    
+    /* フォーム内の全ての直接子要素に中央配置 */
+    div[data-testid="stForm"] > div > div > div > div:has(button[kind="primaryFormSubmit"]) {
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+    
     /* テキストラベルの色 */
     .agree-label {
         display: flex;
@@ -712,47 +731,27 @@ def main():
         # --- ボタン配置エリア (中央寄せ) ---
         st.markdown("<br>", unsafe_allow_html=True)
         
-        is_first_page = (st.session_state.page == 0)
         is_last_page = (st.session_state.page == TOTAL_PAGES - 1)
         
-        # ボタンを中央配置（Streamlit Cloud対応：シンプル構造）
-        # 最終ページ判定を優先（1ページ構成のときはここを通る）
+        # ボタンを中央配置（Streamlit Cloud対応：CSS専用方式）
+        # st.columnsを使わず、CSSで中央配置を強制
         if is_last_page:
-            # 中央寄せ用のHTML
-            st.markdown("<div style='display:flex; justify-content:center; gap:20px;'>", unsafe_allow_html=True)
-            col1, col2, col3 = st.columns([3, 2, 3])
-            with col2:
-                submitted = st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=True)
-                if submitted:
-                    for q in current_questions:
-                        st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                    st.session_state.finished = True
-                    st.session_state['scroll_to_top'] = True
-                    log_session_state("finished")
-                    st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        elif is_first_page:
-            col1, col2, col3 = st.columns([3, 2, 3])
-            with col2:
-                if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
-                    for q in current_questions:
-                        st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                    st.session_state['scroll_to_top'] = True
-                    st.session_state.page += 1
-                    log_session_state("next_page")
-                    st.rerun()
-
+            submitted = st.form_submit_button("診断結果を見る ＞", type="primary")
+            if submitted:
+                for q in current_questions:
+                    st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
+                st.session_state.finished = True
+                st.session_state['scroll_to_top'] = True
+                log_session_state("finished")
+                st.rerun()
         else:
-            col1, col2, col3 = st.columns([3, 2, 3])
-            with col2:
-                if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
-                    for q in current_questions:
-                        st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                    st.session_state['scroll_to_top'] = True
-                    st.session_state.page += 1
-                    log_session_state("next_page")
-                    st.rerun()
+            if st.form_submit_button("次へ ＞", type="primary"):
+                for q in current_questions:
+                    st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
+                st.session_state['scroll_to_top'] = True
+                st.session_state.page += 1
+                log_session_state("next_page")
+                st.rerun()
 
 if __name__ == "__main__":
     main()
