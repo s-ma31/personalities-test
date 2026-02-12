@@ -733,8 +733,27 @@ def main():
         
         is_last_page = (st.session_state.page == TOTAL_PAGES - 1)
         
-        # ボタンを中央配置（Streamlit Cloud対応：CSS専用方式）
-        # st.columnsを使わず、CSSで中央配置を強制
+        # ボタンを中央配置（Streamlit Cloud対応：JavaScript強制適用）
+        st.markdown("""
+        <script>
+            // ボタンの親要素を中央配置に強制変更
+            setTimeout(function() {
+                const buttons = window.parent.document.querySelectorAll('button[kind="primaryFormSubmit"], button[kind="secondaryFormSubmit"]');
+                buttons.forEach(function(btn) {
+                    let parent = btn.parentElement;
+                    for (let i = 0; i < 5; i++) {
+                        if (parent) {
+                            parent.style.display = 'flex';
+                            parent.style.justifyContent = 'center';
+                            parent.style.width = '100%';
+                            parent = parent.parentElement;
+                        }
+                    }
+                });
+            }, 100);
+        </script>
+        """, unsafe_allow_html=True)
+        
         if is_last_page:
             submitted = st.form_submit_button("診断結果を見る ＞", type="primary")
             if submitted:
