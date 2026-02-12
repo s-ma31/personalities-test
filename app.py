@@ -439,10 +439,25 @@ def calculate_result():
 
     # helper to compute letter and percentage
     def axis_letter_and_pct(score, max_score, pos_letter, neg_letter):
-        pct = (abs(score) / max_score) * 100 if max_score != 0 else 0
-        pct = min(100, max(0, pct))
-        letter = pos_letter if score >= 0 else neg_letter
-        return letter, int(pct)
+        # Determine dominance by which side has the larger percent.
+        # Convert score (range -max_score..+max_score) to a left-side percent 0..100
+        if max_score == 0:
+            return pos_letter, 0
+        left_pct = ((score + max_score) / (2 * max_score)) * 100
+        left_pct = min(100, max(0, left_pct))
+        right_pct = 100 - left_pct
+        # Choose the side with the larger percent as dominant
+        if left_pct > right_pct:
+            letter = pos_letter
+            pct = int(round(left_pct))
+        elif right_pct > left_pct:
+            letter = neg_letter
+            pct = int(round(right_pct))
+        else:
+            # tie (usually left_pct == right_pct == 50): fallback to sign
+            letter = pos_letter if score >= 0 else neg_letter
+            pct = int(round(left_pct))
+        return letter, pct
 
     # Mind -> 意識 (E/I)
     letter, pct = axis_letter_and_pct(scores["Mind"], max_scores["Mind"], "E", "I")
@@ -485,20 +500,43 @@ def generate_ai_context(result_type, details, gender):
 # 3. UI表示
 # ==========================================
 
-def display_progress_bar(label, left_text, right_text, percentage, is_left_dominant):
-    st.markdown(f"**{label}**")
+def display_progress_bar(label, left_text, right_text, percentage, is_left_dominant, color="#00ACC1"):
+    # 上部にラベルと優勢側の項目＋％を表示
+    pct = max(0, min(100, int(percentage)))
+    dominant_text = left_text if is_left_dominant else right_text
+    # バー上部に優勢項目と％を表示（ラベル横の％は削除）
+    st.markdown(f"<div style='display:flex; justify-content:space-between; align-items:center;'><strong>{label}</strong><div style='font-weight:bold;'>{dominant_text} {pct}%</div></div>", unsafe_allow_html=True)
     col_l, col_bar, col_r = st.columns([2, 6, 2])
     with col_l:
-        color = "#009688" if is_left_dominant else "#aaa"
-        st.markdown(f"<div style='text-align:right; color:{color}; font-weight:bold;'>{left_text}</div>", unsafe_allow_html=True)
+        # ラベル横の％は表示しない（上部に表示しているため）
+        left_color = color if is_left_dominant else "#888"
+        left_pct_html = ""
+        st.markdown(f"<div style='text-align:right; color:{left_color}; font-weight:bold;'>{left_text}{left_pct_html}</div>", unsafe_allow_html=True)
     with col_bar:
-        # プログレスバー表示（Streamlit は 0.0-1.0 を想定）
-        st.progress(percentage / 100)
-        # 数値のパーセンテージをプログレスバー下に表示
-        st.markdown(f"<div style='text-align:center; font-weight:bold; margin-top:6px;'>{int(percentage)}%</div>", unsafe_allow_html=True)
+        # シークバー風表示：優勢側から塗り、●マーカーを割合位置に置く
+        fill_color = color
+        fill_dir = 'to right' if is_left_dominant else 'to left'
+        # マーカー位置（左基準）: if left dominant -> pct%, else -> 100 - pct%
+        if is_left_dominant:
+            marker_left = f"calc({pct}% - 8px)"
+            fill_style = f"left:0; width:{pct}%;"
+        else:
+            marker_left = f"calc({100 - pct}% - 8px)"
+            fill_style = f"right:0; width:{pct}%;"
+
+        bar_html = f"""
+        <div style='position:relative; width:100%; height:18px; background:#eee; border-radius:10px; overflow:visible;'>
+            <div style='position:absolute; top:0; bottom:0; {fill_style} background:linear-gradient({fill_dir}, {fill_color}, {fill_color}); border-radius:10px 10px 10px 10px;'></div>
+            <!-- マーカー -->
+            <div style='position:absolute; top:50%; left:{marker_left}; transform:translateY(-50%); width:16px; height:16px; border-radius:50%; background:#fff; border:3px solid #444; box-shadow:0 2px 4px rgba(0,0,0,0.2);'></div>
+        </div>
+        """
+        st.markdown(bar_html, unsafe_allow_html=True)
     with col_r:
-        color = "#884444" if not is_left_dominant else "#aaa"
-        st.markdown(f"<div style='text-align:left; color:{color}; font-weight:bold;'>{right_text}</div>", unsafe_allow_html=True)
+        # ラベル横の％は表示しない（上部に表示しているため）
+        right_color = color if not is_left_dominant else "#888"
+        right_pct_html = ""
+        st.markdown(f"<div style='text-align:left; color:{right_color}; font-weight:bold;'>{right_pct_html}{right_text}</div>", unsafe_allow_html=True)
 
 def main():
     # ページ読み込み時のスクロール処理などはそのまま維持
@@ -532,11 +570,19 @@ def main():
         st.markdown(f"<h2 style='text-align: center; color: #4CAF50; font-size: 4em;'>{result_type}</h2>", unsafe_allow_html=True)
         st.markdown("---")
         
-        display_progress_bar("意識 (Mind)", "外向型 (E)", "内向型 (I)", details["意識"]["pct"], details["意識"]["letter"] == "E")
-        display_progress_bar("エネルギー (Energy)", "直感型 (N)", "現実型 (S)", details["エネルギー"]["pct"], details["エネルギー"]["letter"] == "N")
-        display_progress_bar("性質 (Nature)", "感情型 (F)", "思考型 (T)", details["性質"]["pct"], details["性質"]["letter"] == "F")
-        display_progress_bar("戦術 (Tactics)", "計画型 (J)", "探索型 (P)", details["戦術"]["pct"], details["戦術"]["letter"] == "J")
-        display_progress_bar("アイデンティティ (Identity)", "自己主張型 (A)", "慎重型 (T)", details["アイデンティティ"]["pct"], details["アイデンティティ"]["letter"] == "A")
+        # カラー配列（各項目に良い感じの5色）
+        colors = {
+            "意識": "#00ACC1",      # teal
+            "エネルギー": "#FFA726",  # orange
+            "性質": "#66BB6A",      # green
+            "戦術": "#7E57C2",      # purple
+            "アイデンティティ": "#EF5350"  # red
+        }
+        display_progress_bar("意識 (Mind)", "外向型 (E)", "内向型 (I)", details["意識"]["pct"], details["意識"]["letter"] == "E", color=colors["意識"])
+        display_progress_bar("エネルギー (Energy)", "直感型 (N)", "現実型 (S)", details["エネルギー"]["pct"], details["エネルギー"]["letter"] == "N", color=colors["エネルギー"])
+        display_progress_bar("性質 (Nature)", "感情型 (F)", "思考型 (T)", details["性質"]["pct"], details["性質"]["letter"] == "F", color=colors["性質"])
+        display_progress_bar("戦術 (Tactics)", "計画型 (J)", "探索型 (P)", details["戦術"]["pct"], details["戦術"]["letter"] == "J", color=colors["戦術"])
+        display_progress_bar("アイデンティティ (Identity)", "自己主張型 (A)", "慎重型 (T)", details["アイデンティティ"]["pct"], details["アイデンティティ"]["letter"] == "A", color=colors["アイデンティティ"])
 
         st.markdown("---")
         
@@ -598,28 +644,38 @@ def main():
         
         for q in current_questions:
             st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
-            # カラム比を調整してラベルをラジオボタンに近づける
+            # カラム比を調整
             c1, c2, c3 = st.columns([1, 7, 1])
             
             with c1:
                 st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
             with c2:
-                # 【重要】session_state.answers から保存済みの値を取得（なければ0）
-                current_val = st.session_state.answers.get(q['id'], 0)
-                
-                # key を radio_{id} に設定することで、自動的に session_state に入る
+                # ==================================================
+                # 【重要修正】Cloudでの値リセットを防ぐための同期処理
+                # ==================================================
                 key_radio = f"radio_{q['id']}"
+                saved_val = st.session_state.answers.get(q['id'], 0)
+                
+                # もしセッションステートからキーが消えていたら（リセットされていたら）、
+                # 保存されている answers の値で強制的に復元する
+                if key_radio not in st.session_state:
+                    st.session_state[key_radio] = saved_val
+
+                # ラジオボタンの表示
                 st.radio(
                     f"質問 {q['id']}",
                     options,
-                    index=options.index(current_val) if current_val in options else 0,
+                    # indexは念のため指定するが、実質は上のsession_stateへの代入が優先される
                     horizontal=True,
                     format_func=lambda x: "",
                     label_visibility="collapsed",
                     key=key_radio
                 )
-                # 常に最新のラジオ値を `st.session_state.answers` に反映
+                
+                # 表示した後、念のため answers にも今の値を書き戻しておく
                 st.session_state.answers[q['id']] = st.session_state.get(key_radio, 0)
+                # ==================================================
+
             with c3:
                 st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
             
@@ -627,21 +683,15 @@ def main():
 
         # --- ボタン配置エリア (中央寄せ) ---
         st.markdown("<br>", unsafe_allow_html=True)
-        
-        # 3カラム作成： [空白(1)] [ボタンエリア(2)] [空白(1)] で中央に寄せる
         b_col1, b_col2, b_col3 = st.columns([1, 2, 1])
         
-        # ページ移動のロジック
         is_first_page = (st.session_state.page == 0)
         is_last_page = (st.session_state.page == TOTAL_PAGES - 1)
         
-        # ボタンエリア(中央)の中にさらに2カラム作って「戻る」「次へ」を並べる
         with b_col2:
-            # ページごとにボタンの出し分け
             if is_first_page:
-                # 最初のページは「次へ」のみ
                 if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
-                    # 【重要】現在のページの回答を保存
+                    # ページ送り時に値を確定保存
                     for q in current_questions:
                         st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
                     st.session_state['scroll_to_top'] = True
@@ -650,11 +700,9 @@ def main():
                     st.rerun()
 
             elif is_last_page:
-                # 最後のページは「戻る」と「結果を見る」
                 btns = st.columns(2)
                 with btns[0]:
                     if st.form_submit_button("＜ 前へ", use_container_width=True):
-                        # 戻る時も一応保存しておく
                         for q in current_questions:
                             st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
                         st.session_state['scroll_to_top'] = True
@@ -663,7 +711,6 @@ def main():
                         st.rerun()
                 with btns[1]:
                     if st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=True):
-                        # 回答を保存
                         for q in current_questions:
                             st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
                         st.session_state.finished = True
@@ -672,7 +719,6 @@ def main():
                         st.rerun()
             
             else:
-                # 中間のページは「戻る」と「次へ」
                 btns = st.columns(2)
                 with btns[0]:
                     if st.form_submit_button("＜ 前へ", use_container_width=True):
@@ -690,18 +736,6 @@ def main():
                         st.session_state.page += 1
                         log_session_state("next_page")
                         st.rerun()
-
-    # 開発用：ローカル実行時にサーバを停止するボタン（Ctrl+C の代替）
-    st.markdown("---")
-    st.markdown("<div style='text-align:center;'><small>開発用：ローカルで実行中の Streamlit サーバを停止します。</small></div>", unsafe_allow_html=True)
-    if st.button("サーバーを終了する（ローカルのみ）"):
-        st.warning("サーバーを停止しています...")
-        try:
-            log_session_state("server_stop")
-            os.kill(os.getpid(), signal.SIGTERM)
-        except Exception:
-            log_session_state("server_stop")
-            os._exit(0)
 
 if __name__ == "__main__":
     main()
