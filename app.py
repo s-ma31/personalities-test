@@ -255,6 +255,13 @@ if 'answers' not in st.session_state:
 if 'gender_input' not in st.session_state:
     st.session_state.gender_input = "回答しない"
 
+# ラジオstateの初期化と補正（Cloudで未知の初期値が入る場合に備える）
+options = [-3, -2, -1, 0, 1, 2, 3]
+for q in questions_data:
+    rk = f"radio_{q['id']}"
+    if rk not in st.session_state or st.session_state.get(rk) not in options:
+        st.session_state[rk] = 0
+
 # デバッグ表示（最初の数問のstateを確認）
 with st.sidebar.expander("Debug: state", expanded=False):
     preview_answers = [(i, st.session_state.answers.get(i, 0)) for i in range(min(10, len(questions_data)))]
@@ -272,7 +279,11 @@ def calculate_result():
     # ラジオstateをanswersに同期（Cloudでの再実行でも最新を使う）
     for q in questions_data:
         qid = q['id']
-        st.session_state.answers[qid] = st.session_state.get(f"radio_{qid}", st.session_state.answers.get(qid, 0))
+        val = st.session_state.get(f"radio_{qid}", st.session_state.answers.get(qid, 0))
+        if val not in options:
+            val = 0
+        st.session_state.answers[qid] = val
+        st.session_state[f"radio_{qid}"] = val
 
     scores = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
     max_scores = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
