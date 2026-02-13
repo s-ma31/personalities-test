@@ -473,6 +473,7 @@ def render_result():
     if st.button("最初からやり直す", use_container_width=True):
         st.session_state.answers = {i: 0 for i in range(len(questions_data))}
         st.session_state.finished = False
+        st.session_state.current_page = 0
         st.rerun()
 
 
