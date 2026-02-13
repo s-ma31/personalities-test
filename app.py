@@ -468,8 +468,14 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("---")
 
-    # --- 質問一覧 ---
+    # --- 質問一覧（フォームなし・on_changeで即座に保存） ---
     options = [-3, -2, -1, 0, 1, 2, 3]
+    
+    def save_answer(qid):
+        """ラジオボタン変更時にsession_stateに値を保存"""
+        key = f"radio_{qid}"
+        if key in st.session_state:
+            st.session_state.answers[qid] = st.session_state[key]
     
     for q in questions_data:
         st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
@@ -480,7 +486,6 @@ def main():
         with c2:
             current_val = st.session_state.answers.get(q['id'], 0)
             
-            # シンプルなラジオボタン（on_changeなし）
             st.radio(
                 f"q_{q['id']}",
                 options,
@@ -488,7 +493,9 @@ def main():
                 horizontal=True,
                 format_func=lambda x: "",
                 label_visibility="collapsed",
-                key=f"radio_{q['id']}"
+                key=f"radio_{q['id']}",
+                on_change=save_answer,
+                args=(q['id'],)
             )
         with c3:
             st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
@@ -506,17 +513,10 @@ def main():
     with center_col:
         if st.button("診断結果を見る ＞", type="primary", use_container_width=True):
             # ボタン押下時に全ての値を確実に保存
-            saved_count = 0
             for q in questions_data:
                 key = f"radio_{q['id']}"
                 if key in st.session_state:
                     st.session_state.answers[q['id']] = st.session_state[key]
-                    saved_count += 1
-            
-            # デバッグ用（一時的に表示）
-            st.write(f"DEBUG: {saved_count}個の回答を保存しました")
-            st.write("サンプル回答:", {k: st.session_state.answers.get(k) for k in range(5)})
-            
             st.session_state.finished = True
             st.rerun()
 
