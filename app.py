@@ -383,7 +383,8 @@ def display_progress_bar(label, left_text, right_text, percentage, is_left_domin
         st.markdown(f"<div style='text-align:left; color:{right_color}; font-weight:bold;'>{right_text}</div>", unsafe_allow_html=True)
 
 def main():
-    st.write("Debug answers:", st.session_state.answers)
+    st.write("DEBUG answers:", st.session_state.answers)
+    st.markdown("""<script>document.addEventListner...""")
     # 完了画面の処理
     if st.session_state.finished:
         st.balloons()
@@ -523,4 +524,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
