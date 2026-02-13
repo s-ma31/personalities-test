@@ -255,13 +255,23 @@ if 'answers' not in st.session_state:
 if 'gender_input' not in st.session_state:
     st.session_state.gender_input = "回答しない"
 
+# デバッグ表示（最初の数問のstateを確認）
+with st.sidebar.expander("Debug: state", expanded=False):
+    preview_answers = [(i, st.session_state.answers.get(i, 0)) for i in range(min(10, len(questions_data)))]
+    st.write({f"Q{i+1}": v for i, v in preview_answers})
+    st.write({"finished": st.session_state.get("finished"), "gender": st.session_state.get("gender_input")})
+
 def calculate_result():
+    # ラジオstateをanswersに同期（Cloudでの再実行でも最新を使う）
+    for q in questions_data:
+        qid = q['id']
+        st.session_state.answers[qid] = st.session_state.get(f"radio_{qid}", st.session_state.answers.get(qid, 0))
+
     scores = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
     max_scores = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
 
     for q in questions_data:
         qid = q['id']
-        # 直近の回答はanswersに正規化して保存している想定
         val = st.session_state.answers.get(qid, 0)
         axis = q.get("axis")
         if axis not in scores: continue
