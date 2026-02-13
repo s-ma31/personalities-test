@@ -469,7 +469,9 @@ def main():
     st.markdown("---")
 
     # --- 質問一覧（フォームで囲む：これが重要！） ---
+    st.write("🔍 フォームのテスト: この文字が見えますか？")
     with st.form("personality_quiz_form"):
+        st.write("📝 フォームの中です")
         options = [-3, -2, -1, 0, 1, 2, 3]
         
         for q in questions_data:
@@ -525,3 +527,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
