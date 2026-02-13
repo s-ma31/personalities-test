@@ -524,6 +524,10 @@ def main():
     _, center_col, _ = st.columns([1, 2, 1])
     with center_col:
         if st.button("診断結果を見る ＞", type="primary", use_container_width=True):
+            # 送信直前に全回答を確定保存（Cloudでラジオstateが消えても計算可能にする）
+            for q in questions_data:
+                qid = q["id"]
+                st.session_state.answers[qid] = st.session_state.get(f"radio_{qid}", st.session_state.answers.get(qid, 0))
             st.session_state.finished = True
             st.rerun()
 
