@@ -25,8 +25,8 @@ st.markdown("""
     }
     @media (prefers-color-scheme: dark) { .question-text { color: #eee; } }
 
-    /* ラジオボタン全体のコンテナ */
-    div[data-testid="stForm"] div[role="radiogroup"] {
+    /* 診断用ラジオボタン（7選択肢）全体のコンテナ */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) {
         display: flex;
         justify-content: center !important;
         align-items: center;
@@ -36,23 +36,23 @@ st.markdown("""
         flex-wrap: nowrap !important;
     }
 
-    /* ラベルのテキストを完全に非表示 */
-    div[data-testid="stForm"] div[role="radiogroup"] label > div[data-testid="stMarkdownContainer"] {
+    /* 診断用ラジオボタンのラベルテキストを非表示 */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label > div[data-testid="stMarkdownContainer"] {
         display: none !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label p { display: none !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label span { display: none !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label div p { display: none !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label p { display: none !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label span { display: none !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label div p { display: none !important; }
 
-    /* ラベル全体 */
-    div[data-testid="stForm"] div[role="radiogroup"] label {
+    /* 診断用ラベル全体 */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label {
         cursor: pointer !important;
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    /* ラジオボタンの丸部分のコンテナ */
-    div[data-testid="stForm"] div[role="radiogroup"] label > div:first-child {
+    /* 診断用ラジオボタンの丸部分のコンテナ */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label > div:first-child {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -64,75 +64,75 @@ st.markdown("""
     }
 
     /* 内側の点を非表示 */
-    div[data-testid="stForm"] div[role="radiogroup"] label > div:first-child > div {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label > div:first-child > div {
         display: none !important;
     }
 
     /* --- サイズ設定（外側ほど大きく） --- */
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(1) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(1) > div:first-child {
         width: 42px !important; height: 42px !important; min-width: 42px !important; min-height: 42px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(2) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(2) > div:first-child {
         width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(3) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(3) > div:first-child {
         width: 24px !important; height: 24px !important; min-width: 24px !important; min-height: 24px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(4) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(4) > div:first-child {
         width: 18px !important; height: 18px !important; min-width: 18px !important; min-height: 18px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(5) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(5) > div:first-child {
         width: 24px !important; height: 24px !important; min-width: 24px !important; min-height: 24px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(6) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(6) > div:first-child {
         width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(7) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(7) > div:first-child {
         width: 42px !important; height: 42px !important; min-width: 42px !important; min-height: 42px !important;
     }
 
     /* --- 色設定（左：紫 / 右：緑） --- */
 
     /* デフォルト枠線色 */
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(1) > div:first-child { border-color: #E1BEE7 !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(2) > div:first-child { border-color: #CE93D8 !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(3) > div:first-child { border-color: #BA68C8 !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(5) > div:first-child { border-color: #C8E6C9 !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(6) > div:first-child { border-color: #A5D6A7 !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(7) > div:first-child { border-color: #81C784 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(1) > div:first-child { border-color: #E1BEE7 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(2) > div:first-child { border-color: #CE93D8 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(3) > div:first-child { border-color: #BA68C8 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(5) > div:first-child { border-color: #C8E6C9 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(6) > div:first-child { border-color: #A5D6A7 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(7) > div:first-child { border-color: #81C784 !important; }
 
     /* ホバー時 */
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(1):hover > div:first-child,
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(2):hover > div:first-child,
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(3):hover > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(1):hover > div:first-child,
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(2):hover > div:first-child,
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(3):hover > div:first-child {
         border-color: #9C27B0 !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(5):hover > div:first-child,
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(6):hover > div:first-child,
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(7):hover > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(5):hover > div:first-child,
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(6):hover > div:first-child,
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(7):hover > div:first-child {
         border-color: #81C784 !important;
     }
 
     /* 選択時（塗りつぶし） */
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(1) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(1) > div:first-child {
         background-color: #4A148C !important; border-color: #4A148C !important; transform: scale(1.14) !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(2) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(2) > div:first-child {
         background-color: #7B1FA2 !important; border-color: #7B1FA2 !important; transform: scale(1.12) !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(3) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(3) > div:first-child {
         background-color: #BA68C8 !important; border-color: #BA68C8 !important; transform: scale(1.1) !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(4) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(4) > div:first-child {
         background-color: #9E9E9E !important; border-color: #9E9E9E !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(5) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(5) > div:first-child {
         background-color: #66BB6A !important; border-color: #66BB6A !important; transform: scale(1.1) !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(6) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(6) > div:first-child {
         background-color: #43A047 !important; border-color: #43A047 !important; transform: scale(1.12) !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(7) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(7) > div:first-child {
         background-color: #2E7D32 !important; border-color: #2E7D32 !important; transform: scale(1.14) !important;
     }
 
@@ -145,10 +145,6 @@ st.markdown("""
         width: 100%; max-width: 320px; font-weight: bold;
         padding: 10px 0; border-radius: 20px; margin: 0 auto;
     }
-    
-    /* フォーム送信ボタンの中央配置 */
-    div[data-testid="stForm"] button[type="submit"] { display: inline-block !important; min-width: 180px !important; }
-    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] { text-align: center !important; width: 100% !important; }
     
     /* テキストラベルの色 */
     .agree-label { 
@@ -472,52 +468,57 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("---")
 
-    # --- フォーム開始 (1ページ完結) ---
-    with st.form(key="diagnosis_form"):
-        options = [-3, -2, -1, 0, 1, 2, 3]
+    # --- 質問一覧（フォームなし・on_changeで即座に保存） ---
+    options = [-3, -2, -1, 0, 1, 2, 3]
+    
+    def save_answer(qid):
+        """ラジオボタン変更時にsession_stateに値を保存"""
+        key = f"radio_{qid}"
+        if key in st.session_state:
+            st.session_state.answers[qid] = st.session_state[key]
+    
+    for q in questions_data:
+        st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
+        c1, c2, c3 = st.columns([1.5, 7, 1.5])
         
-        for q in questions_data:
-            st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
-            c1, c2, c3 = st.columns([1.5, 7, 1.5])
+        with c1:
+            st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
+        with c2:
+            current_val = st.session_state.answers.get(q['id'], 0)
             
-            with c1:
-                st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
-            with c2:
-                current_val = st.session_state.answers.get(q['id'], 0)
-                
-                st.radio(
-                    f"q_{q['id']}",
-                    options,
-                    index=options.index(current_val),
-                    horizontal=True,
-                    format_func=lambda x: "",
-                    label_visibility="collapsed",
-                    key=f"radio_{q['id']}"
-                )
-            with c3:
-                st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
-            
-            # 区切り線
-            if (q['id'] + 1) % 5 == 0 and (q['id'] + 1) != len(questions_data):
-                st.markdown("<hr style='margin: 30px 0; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
-            else:
-                st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
+            st.radio(
+                f"q_{q['id']}",
+                options,
+                index=options.index(current_val),
+                horizontal=True,
+                format_func=lambda x: "",
+                label_visibility="collapsed",
+                key=f"radio_{q['id']}",
+                on_change=save_answer,
+                args=(q['id'],)
+            )
+        with c3:
+            st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
+        
+        # 区切り線
+        if (q['id'] + 1) % 5 == 0 and (q['id'] + 1) != len(questions_data):
+            st.markdown("<hr style='margin: 30px 0; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
+        else:
+            st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
 
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        # ボタン配置 (中央寄せ)
-        _, center_col, _ = st.columns([1, 2, 1])
-        with center_col:
-            submitted = st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=True)
-            
-            if submitted:
-                # フォーム送信時に一括保存
-                for q in questions_data:
-                    key = f"radio_{q['id']}"
-                    if key in st.session_state:
-                        st.session_state.answers[q['id']] = st.session_state[key]
-                st.session_state.finished = True
-                st.rerun()
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # ボタン配置 (中央寄せ)
+    _, center_col, _ = st.columns([1, 2, 1])
+    with center_col:
+        if st.button("診断結果を見る ＞", type="primary", use_container_width=True):
+            # ボタン押下時に全ての値を確実に保存
+            for q in questions_data:
+                key = f"radio_{q['id']}"
+                if key in st.session_state:
+                    st.session_state.answers[q['id']] = st.session_state[key]
+            st.session_state.finished = True
+            st.rerun()
 
 if __name__ == "__main__":
     main()
