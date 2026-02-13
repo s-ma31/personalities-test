@@ -1,8 +1,5 @@
 import streamlit as st
 import pandas as pd
-import streamlit.components.v1 as components
-import os
-import signal
 import json
 import datetime
 
@@ -15,9 +12,7 @@ st.set_page_config(page_title="性格タイプ診断", layout="wide")
 st.markdown("""
 <style>
     /* ページ全体を強制的にトップにスクロール */
-    .main {
-        scroll-behavior: auto !important;
-    }
+    .main { scroll-behavior: auto !important; }
     
     /* 質問文のスタイル */
     .question-text {
@@ -28,12 +23,10 @@ st.markdown("""
         margin-top: 40px;
         color: #333;
     }
-    @media (prefers-color-scheme: dark) {
-        .question-text { color: #eee; }
-    }
+    @media (prefers-color-scheme: dark) { .question-text { color: #eee; } }
 
-    /* ラジオボタン全体のコンテナ */
-    div[data-testid="stForm"] div[role="radiogroup"] {
+    /* 診断用ラジオボタン（7選択肢）全体のコンテナ */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) {
         display: flex;
         justify-content: center !important;
         align-items: center;
@@ -43,33 +36,23 @@ st.markdown("""
         flex-wrap: nowrap !important;
     }
 
-    /* ラベルのテキストを完全に非表示 */
-    div[data-testid="stForm"] div[role="radiogroup"] label > div[data-testid="stMarkdownContainer"] {
+    /* 診断用ラジオボタンのラベルテキストを非表示 */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label > div[data-testid="stMarkdownContainer"] {
         display: none !important;
     }
-    
-    /* ラジオボタンのラベルテキスト（質問1、-3など）を非表示 */
-    div[data-testid="stForm"] div[role="radiogroup"] label p {
-        display: none !important;
-    }
-    
-    div[data-testid="stForm"] div[role="radiogroup"] label span {
-        display: none !important;
-    }
-    
-    div[data-testid="stForm"] div[role="radiogroup"] label div p {
-        display: none !important;
-    }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label p { display: none !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label span { display: none !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label div p { display: none !important; }
 
-    /* ラベル全体 */
-    div[data-testid="stForm"] div[role="radiogroup"] label {
+    /* 診断用ラベル全体 */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label {
         cursor: pointer !important;
         margin: 0 !important;
         padding: 0 !important;
     }
 
-    /* ラジオボタンの丸部分のコンテナ */
-    div[data-testid="stForm"] div[role="radiogroup"] label > div:first-child {
+    /* 診断用ラジオボタンの丸部分のコンテナ */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label > div:first-child {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -81,263 +64,179 @@ st.markdown("""
     }
 
     /* 内側の点を非表示 */
-    div[data-testid="stForm"] div[role="radiogroup"] label > div:first-child > div {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label > div:first-child > div {
         display: none !important;
     }
 
-    /* サイズ設定（提供されたベースコードのまま維持） */
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(1) > div:first-child {
+    /* --- サイズ設定（外側ほど大きく） --- */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(1) > div:first-child {
         width: 42px !important; height: 42px !important; min-width: 42px !important; min-height: 42px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(2) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(2) > div:first-child {
         width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(3) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(3) > div:first-child {
         width: 24px !important; height: 24px !important; min-width: 24px !important; min-height: 24px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(4) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(4) > div:first-child {
         width: 18px !important; height: 18px !important; min-width: 18px !important; min-height: 18px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(5) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(5) > div:first-child {
         width: 24px !important; height: 24px !important; min-width: 24px !important; min-height: 24px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(6) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(6) > div:first-child {
         width: 32px !important; height: 32px !important; min-width: 32px !important; min-height: 32px !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(7) > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(7) > div:first-child {
         width: 42px !important; height: 42px !important; min-width: 42px !important; min-height: 42px !important;
     }
 
-    /* --- 色設定の変更（左側を紫に変更） --- */
+    /* --- 色設定（左：紫 / 右：緑） --- */
 
-    /* デフォルト枠線色: 左側（薄い紫） */
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(1) > div:first-child { border-color: #E1BEE7 !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(2) > div:first-child { border-color: #CE93D8 !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(3) > div:first-child { border-color: #BA68C8 !important; }
-    
-    /* 右側（薄い緑：そのまま） */
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(5) > div:first-child { border-color: #C8E6C9 !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(6) > div:first-child { border-color: #A5D6A7 !important; }
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(7) > div:first-child { border-color: #81C784 !important; }
+    /* デフォルト枠線色 */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(1) > div:first-child { border-color: #E1BEE7 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(2) > div:first-child { border-color: #CE93D8 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(3) > div:first-child { border-color: #BA68C8 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(5) > div:first-child { border-color: #C8E6C9 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(6) > div:first-child { border-color: #A5D6A7 !important; }
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(7) > div:first-child { border-color: #81C784 !important; }
 
-    /* ホバー時 - 左側（紫） */
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(1):hover > div:first-child,
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(2):hover > div:first-child,
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(3):hover > div:first-child {
+    /* ホバー時 */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(1):hover > div:first-child,
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(2):hover > div:first-child,
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(3):hover > div:first-child {
         border-color: #9C27B0 !important;
     }
-
-    /* ホバー時 - 右側（緑：そのまま） */
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(5):hover > div:first-child,
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(6):hover > div:first-child,
-    div[data-testid="stForm"] div[role="radiogroup"] label:nth-of-type(7):hover > div:first-child {
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(5):hover > div:first-child,
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(6):hover > div:first-child,
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:nth-of-type(7):hover > div:first-child {
         border-color: #81C784 !important;
     }
 
-    /* 選択時 - 左側3つ（紫で塗りつぶし） - サイズごとに濃淡 */
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(1) > div:first-child {
-        background-color: #4A148C !important; /* 濃い紫 */
-        border-color: #4A148C !important;
-        transform: scale(1.14) !important;
+    /* 選択時（塗りつぶし） */
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(1) > div:first-child {
+        background-color: #4A148C !important; border-color: #4A148C !important; transform: scale(1.14) !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(2) > div:first-child {
-        background-color: #7B1FA2 !important; /* 中間の紫 */
-        border-color: #7B1FA2 !important;
-        transform: scale(1.12) !important;
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(2) > div:first-child {
+        background-color: #7B1FA2 !important; border-color: #7B1FA2 !important; transform: scale(1.12) !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(3) > div:first-child {
-        background-color: #BA68C8 !important; /* 明るい紫 */
-        border-color: #BA68C8 !important;
-        transform: scale(1.1) !important;
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(3) > div:first-child {
+        background-color: #BA68C8 !important; border-color: #BA68C8 !important; transform: scale(1.1) !important;
     }
-
-    /* 選択時 - 中央（グレー：そのまま） */
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(4) > div:first-child {
-        background-color: #9E9E9E !important;
-        border-color: #9E9E9E !important;
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(4) > div:first-child {
+        background-color: #9E9E9E !important; border-color: #9E9E9E !important;
     }
-
-    /* 選択時 - 右側3つ（緑で塗りつぶし：そのまま） */
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(5) > div:first-child {
-        background-color: #66BB6A !important;
-        border-color: #66BB6A !important;
-        transform: scale(1.1) !important;
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(5) > div:first-child {
+        background-color: #66BB6A !important; border-color: #66BB6A !important; transform: scale(1.1) !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(6) > div:first-child {
-        background-color: #43A047 !important;
-        border-color: #43A047 !important;
-        transform: scale(1.12) !important;
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(6) > div:first-child {
+        background-color: #43A047 !important; border-color: #43A047 !important; transform: scale(1.12) !important;
     }
-    div[data-testid="stForm"] div[role="radiogroup"] label:has(input:checked):nth-of-type(7) > div:first-child {
-        background-color: #2E7D32 !important;
-        border-color: #2E7D32 !important;
-        transform: scale(1.14) !important;
+    div[role="radiogroup"]:has(label:nth-of-type(7)) label:has(input:checked):nth-of-type(7) > div:first-child {
+        background-color: #2E7D32 !important; border-color: #2E7D32 !important; transform: scale(1.14) !important;
     }
 
     /* ヘッダー隠し */
     header {visibility: hidden;}
     
     /* ボタン調整・中央寄せ */
-    .stButton {
-        display: flex;
-        justify-content: center;
-    }
+    .stButton { display: flex; justify-content: center; }
     .stButton button {
-        width: 100%;
-        max-width: 320px;
-        font-weight: bold;
-        padding: 10px 0;
-        border-radius: 20px;
-        margin: 0 auto;
-    }
-    
-    /* フォーム送信ボタンの中央配置 - Streamlit Cloud対応 */
-    div[data-testid="stForm"] button[type="submit"],
-    div[data-testid="stForm"] button[kind="primaryFormSubmit"],
-    div[data-testid="stForm"] button[kind="secondaryFormSubmit"] {
-        display: inline-block !important;
-        min-width: 180px !important;
-    }
-    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] {
-        text-align: center !important;
-        width: 100% !important;
-    }
-    div[data-testid="stForm"] div[data-testid="stFormSubmitButton"] > div {
-        text-align: center !important;
-        display: block !important;
-        width: 100% !important;
-    }
-    div[data-testid="stForm"] div[class*="stBaseButton"] {
-        text-align: center !important;
-        width: 100% !important;
+        width: 100%; max-width: 320px; font-weight: bold;
+        padding: 10px 0; border-radius: 20px; margin: 0 auto;
     }
     
     /* テキストラベルの色 */
-    .agree-label {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-        margin: 0;
-        padding: 0 2px;
-        color: #4CAF50;
-        font-weight: 700;
-        font-size: 1.15rem;
-        line-height: 1;
+    .agree-label { 
+        text-align: left; color: #4CAF50; font-weight: bold; font-size: 1.15rem; padding-top: 5px; 
     }
-    .disagree-label {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        margin: 0;
-        padding: 0 2px;
-        color: #8E24AA; /* ここを水色から紫に変更 */
-        font-weight: 700;
-        font-size: 1.15rem;
-        line-height: 1;
+    .disagree-label { 
+        text-align: right; color: #8E24AA; font-weight: bold; font-size: 1.15rem; padding-top: 5px; 
     }
 
     /* 性別選択セクション */
-    .gender-section {
-        background-color: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-    }
-    @media (prefers-color-scheme: dark) {
-        .gender-section { background-color: #2d2d2d; }
-    }
-
-    /* モバイル対応 */
-    @media (max-width: 640px) {
-        div[data-testid="stForm"] div[role="radiogroup"] { gap: 8px; }
-    }
+    .gender-section { background-color: rgba(128, 128, 128, 0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+    
+    /* 画像用 */
+    img.pixelated { image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges; }
+    
+    @media (max-width: 640px) { div[data-testid="stForm"] div[role="radiogroup"] { gap: 8px; } }
 </style>
-
-<script>
-    // ページ読み込み時に強制的にトップへスクロール
-    window.addEventListener('load', function() {
-        window.scrollTo(0, 0);
-        const main = window.parent.document.querySelector('.main');
-        if (main) main.scrollTop = 0;
-    });
-</script>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 1. 質問データベース
+# 1. 質問データベース（バランス調整済み: 60問）
 # ==========================================
-
 questions_data = [
-    # --- Page 1 ---
+    # --- Mind: 意識 (E:外向 vs I:内向) ---
     {"text": "定期的に新しい交友関係を築いている", "axis": "Mind", "weight": 1},
-    {"text": "単純で分かりやすい発想より、複雑で新規性のある発想に魅力を感じる", "axis": "Energy", "weight": 1},
-    {"text": "事実を積み上げた議論より、感情に訴える内容のほうが心を動かされる", "axis": "Nature", "weight": 1},
-    {"text": "生活空間や仕事環境は、整っていて清潔に保たれている", "axis": "Tactics", "weight": 1},
-    {"text": "強い重圧がかかっても、たいてい冷静さを保てる", "axis": "Identity", "weight": 1},
-    {"text": "人脈づくりや初対面の人への自己アピールは、かなり負担に感じる", "axis": "Mind", "weight": -1},
-    # --- Page 2 ---
-    {"text": "仕事には優先順位をつけ、効率よく計画し、締め切りより早く終えることが多い", "axis": "Tactics", "weight": 1},
-    {"text": "数値やデータより、人の体験談や感情のほうが強く印象に残る", "axis": "Nature", "weight": 1},
-    {"text": "スケジュール帳やリストなどの管理ツールを使うのが好きだ", "axis": "Tactics", "weight": 1},
-    {"text": "些細なミスでも、自分の能力全体に疑問を抱いてしまう", "axis": "Identity", "weight": -1},
     {"text": "事前の約束がなくても、興味を持った相手に自分から声をかけられる", "axis": "Mind", "weight": 1},
-    {"text": "創作物の多様な解釈について議論することには関心がない", "axis": "Energy", "weight": -1},
-    # --- Page 3 ---
-    {"text": "方針を決める際、他人の気持ちよりも事実を重視する", "axis": "Nature", "weight": -1},
-    {"text": "特に計画を立てずに一日を過ごすことがよくある", "axis": "Tactics", "weight": -1},
-    {"text": "他人にどう思われるかは、ほとんど意識しない", "axis": "Identity", "weight": 1},
     {"text": "チームで取り組む作業が好きだ", "axis": "Mind", "weight": 1},
-    {"text": "未経験のやり方や新しい手法に挑戦するのは楽しい", "axis": "Energy", "weight": 1},
-    {"text": "率直さよりも、相手への配慮を優先する", "axis": "Nature", "weight": 1},
-    # --- Page 4 ---
-    {"text": "新しい体験や知識を積極的に求めている", "axis": "Energy", "weight": 1},
-    {"text": "物事が悪い結果になるのではと考えがちだ", "axis": "Identity", "weight": -1},
-    {"text": "集団で行う活動より、単独での趣味のほうが性に合っている", "axis": "Mind", "weight": -1},
-    {"text": "創作として架空の物語を書く仕事は想像しにくい", "axis": "Energy", "weight": -1},
-    {"text": "多少感情を犠牲にしてでも、効率的な判断を好む", "axis": "Nature", "weight": -1},
-    {"text": "やるべきことを済ませてから休むほうが落ち着く", "axis": "Tactics", "weight": 1},
-    # --- Page 5 ---
-    {"text": "意見が対立したとき、相手の感情より自分の正当性を示すことを優先する", "axis": "Nature", "weight": -1},
-    {"text": "社交の場では、自分から名乗るより相手の出方を待つことが多い", "axis": "Mind", "weight": -1},
-    {"text": "急に感情が変化することがある", "axis": "Identity", "weight": -1},
-    {"text": "感情的な議論には流されにくい", "axis": "Nature", "weight": -1},
-    {"text": "締め切り直前になってようやく動くことが多い", "axis": "Tactics", "weight": -1},
-    {"text": "倫理的な問題について考え、議論するのが好きだ", "axis": "Energy", "weight": 1},
-    # --- Page 6 ---
     {"text": "一人で過ごすより、誰かと一緒にいるほうが心地よい", "axis": "Mind", "weight": 1},
-    {"text": "議論が理論一辺倒になると、興味を失いやすい", "axis": "Energy", "weight": -1},
-    {"text": "事実と感情が食い違う場合、多くは感情を優先する", "axis": "Nature", "weight": 1},
-    {"text": "一定のスケジュールを維持するのは難しいと感じる", "axis": "Tactics", "weight": -1},
-    {"text": "一度決断すると、それを疑うことはほとんどない", "axis": "Identity", "weight": 1},
     {"text": "周囲の友人は、自分を活発で社交的だと評価するだろう", "axis": "Mind", "weight": 1},
-    # --- Page 7 ---
-    {"text": "文章を書くなどの創造的な表現活動に惹かれる", "axis": "Energy", "weight": 1},
-    {"text": "感覚的な印象より、客観的な事実を基準に判断することが多い", "axis": "Nature", "weight": -1},
-    {"text": "毎日のタスクを書き出すのが好きだ", "axis": "Tactics", "weight": 1},
-    {"text": "不安を感じることはほとんどない", "axis": "Identity", "weight": 1},
-    {"text": "電話でのやり取りは避けがちだ", "axis": "Mind", "weight": -1},
-    {"text": "馴染みのない発想や視点を探るのは楽しい", "axis": "Energy", "weight": 1},
-    # --- Page 8 ---
     {"text": "初対面でも、比較的すぐに相手と意思疎通ができる", "axis": "Mind", "weight": 1},
-    {"text": "計画が崩れた場合、できるだけ早く立て直すことを最優先にする", "axis": "Tactics", "weight": 1},
-    {"text": "過去の失敗を、今でも引きずっていることがある", "axis": "Identity", "weight": -1},
-    {"text": "将来世界についての理論的な議論には関心が薄い", "axis": "Energy", "weight": -1},
-    {"text": "感情を制御するというより、感情に左右されていると感じる", "axis": "Identity", "weight": -1},
-    {"text": "判断の際、最も合理的な方法よりも関係者の気持ちを重んじる", "axis": "Nature", "weight": 1},
-    # --- Page 9 ---
-    {"text": "自分の働き方は、継続的努力より突発的な集中力の波に近い", "axis": "Tactics", "weight": -1},
-    {"text": "高く評価されると、いつ相手を失望させるか考えてしまう", "axis": "Identity", "weight": -1},
+    {"text": "人脈づくりや初対面の人への自己アピールは、かなり負担に感じる", "axis": "Mind", "weight": -1},
+    {"text": "集団で行う活動より、単独での趣味のほうが性に合っている", "axis": "Mind", "weight": -1},
+    {"text": "社交の場では、自分から名乗るより相手の出方を待つことが多い", "axis": "Mind", "weight": -1},
+    {"text": "電話でのやり取りは避けがちだ", "axis": "Mind", "weight": -1},
     {"text": "ほぼ一人で進める仕事に魅力を感じる", "axis": "Mind", "weight": -1},
-    {"text": "抽象的・哲学的な問題を深く考えるのは無駄だと思う", "axis": "Energy", "weight": -1},
-    {"text": "静かな場所より、人が多く活気のある環境を好む", "axis": "Mind", "weight": 1},
-    {"text": "正しいと感じた決断なら、追加の根拠がなくても行動に移す", "axis": "Identity", "weight": 1},
-    # --- Page 10 ---
-    {"text": "精神的に余裕がないと感じることが多い", "axis": "Identity", "weight": -1},
-    {"text": "手順を省かず、順番通り丁寧に進めたい", "axis": "Tactics", "weight": 1},
+    {"text": "人が多く活気のある場所に長時間いると、疲れを感じやすい", "axis": "Mind", "weight": -1},
+
+    # --- Energy: エネルギー (N:直感 vs S:現実) ---
+    {"text": "単純で分かりやすい発想より、複雑で新規性のある発想に魅力を感じる", "axis": "Energy", "weight": 1},
+    {"text": "未経験のやり方や新しい手法に挑戦するのは楽しい", "axis": "Energy", "weight": 1},
+    {"text": "倫理的な問題について考え、議論するのが好きだ", "axis": "Energy", "weight": 1},
+    {"text": "文章を書くなどの創造的な表現活動に惹かれる", "axis": "Energy", "weight": 1},
+    {"text": "馴染みのない発想や視点を探るのは楽しい", "axis": "Energy", "weight": 1},
     {"text": "決められた手順の作業より、創造的な解決を考える仕事が好きだ", "axis": "Energy", "weight": 1},
+    {"text": "創作物の多様な解釈について議論することには関心がない", "axis": "Energy", "weight": -1},
+    {"text": "創作として架空の物語を書く仕事は想像しにくい", "axis": "Energy", "weight": -1},
+    {"text": "議論が理論一辺倒になると、興味を失いやすい", "axis": "Energy", "weight": -1},
+    {"text": "将来世界についての理論的な議論には関心が薄い", "axis": "Energy", "weight": -1},
+    {"text": "抽象的・哲学的な問題を深く考えるのは無駄だと思う", "axis": "Energy", "weight": -1},
+    {"text": "新しい刺激よりも、慣れ親しんだルーチンの方が落ち着く", "axis": "Energy", "weight": -1},
+
+    # --- Nature: 気質 (F:道理 vs T:論理) ---
+    {"text": "事実を積み上げた議論より、感情に訴える内容のほうが心を動かされる", "axis": "Nature", "weight": 1},
+    {"text": "数値やデータより、人の体験談や感情のほうが強く印象に残る", "axis": "Nature", "weight": 1},
+    {"text": "率直さよりも、相手への配慮を優先する", "axis": "Nature", "weight": 1},
+    {"text": "事実と感情が食い違う場合、多くは感情を優先する", "axis": "Nature", "weight": 1},
+    {"text": "判断の際、最も合理的な方法よりも関係者の気持ちを重んじる", "axis": "Nature", "weight": 1},
     {"text": "意思決定では、論理より感情的な直感に頼りやすい", "axis": "Nature", "weight": 1},
+    {"text": "方針を決める際、他人の気持ちよりも事実を重視する", "axis": "Nature", "weight": -1},
+    {"text": "多少感情を犠牲にしてでも、効率的な判断を好む", "axis": "Nature", "weight": -1},
+    {"text": "意見が対立したとき、相手の感情より自分の正当性を示すことを優先する", "axis": "Nature", "weight": -1},
+    {"text": "感情的な議論には流されにくい", "axis": "Nature", "weight": -1},
+    {"text": "感覚的な印象より、客観的な事実を基準に判断することが多い", "axis": "Nature", "weight": -1},
+    {"text": "友人が悲しんでいる時、情緒的サポートより問題解決策を提案したくなる", "axis": "Nature", "weight": -1},
+
+    # --- Tactics: 戦術 (J:計画 vs P:探索) ---
+    {"text": "生活空間や仕事環境は、整っていて清潔に保たれている", "axis": "Tactics", "weight": 1},
+    {"text": "仕事には優先順位をつけ、効率よく計画し、締め切りより早く終えることが多い", "axis": "Tactics", "weight": 1},
+    {"text": "スケジュール帳やリストなどの管理ツールを使うのが好きだ", "axis": "Tactics", "weight": 1},
+    {"text": "やるべきことを済ませてから休むほうが落ち着く", "axis": "Tactics", "weight": 1},
+    {"text": "手順を省かず、順番通り丁寧に進めたい", "axis": "Tactics", "weight": 1},
+    {"text": "計画が崩れた場合、できるだけ早く立て直すことを最優先にする", "axis": "Tactics", "weight": 1},
+    {"text": "特に計画を立てずに一日を過ごすことがよくある", "axis": "Tactics", "weight": -1},
+    {"text": "締め切り直前になってようやく動くことが多い", "axis": "Tactics", "weight": -1},
+    {"text": "一定のスケジュールを維持するのは難しいと感じる", "axis": "Tactics", "weight": -1},
+    {"text": "自分の働き方は、継続的努力より突発的な集中力の波に近い", "axis": "Tactics", "weight": -1},
     {"text": "締め切りを守るのが得意ではない", "axis": "Tactics", "weight": -1},
+    {"text": "タスクリストを作るより、その場の流れで動くのが好きだ", "axis": "Tactics", "weight": -1},
+
+    # --- Identity: アイデンティティ (A:自己主張 vs T:慎重) ---
+    {"text": "強い重圧がかかっても、たいてい冷静さを保てる", "axis": "Identity", "weight": 1},
+    {"text": "他人にどう思われるかは、ほとんど意識しない", "axis": "Identity", "weight": 1},
+    {"text": "不安を感じることはほとんどない", "axis": "Identity", "weight": 1},
+    {"text": "一度決断すると、それを疑うことはほとんどない", "axis": "Identity", "weight": 1},
+    {"text": "正しいと感じた決断なら、追加の根拠がなくても行動に移す", "axis": "Identity", "weight": 1},
     {"text": "自分に関わることは、うまく進むはずだと感じている", "axis": "Identity", "weight": 1},
+    {"text": "些細なミスでも、自分の能力全体に疑問を抱いてしまう", "axis": "Identity", "weight": -1},
+    {"text": "物事が悪い結果になるのではと考えがちだ", "axis": "Identity", "weight": -1},
+    {"text": "急に感情が変化することがある", "axis": "Identity", "weight": -1},
+    {"text": "過去の失敗を、今でも引きずっていることがある", "axis": "Identity", "weight": -1},
+    {"text": "感情を制御するというより、感情に左右されていると感じる", "axis": "Identity", "weight": -1},
+    {"text": "高く評価されると、いつ相手を失望させるか考えてしまう", "axis": "Identity", "weight": -1},
 ]
 
 # IDを付与
@@ -348,36 +247,58 @@ for i, q in enumerate(questions_data):
 # 2. セッション管理とロジック
 # ==========================================
 
-if 'page' not in st.session_state:
-    st.session_state.page = 0
 if 'finished' not in st.session_state:
     st.session_state.finished = False
+# 7段階の数値選択肢（intで保持）
+OPTIONS = [-3, -2, -1, 0, 1, 2, 3]
+
 if 'answers' not in st.session_state:
-    st.session_state.answers = {}
-    for i in range(len(questions_data)):
-        st.session_state.answers[i] = 0
+    st.session_state.answers = {i: 0 for i in range(len(questions_data))}
 if 'gender_input' not in st.session_state:
     st.session_state.gender_input = "回答しない"
-if 'scroll_to_top' not in st.session_state:
-    st.session_state.scroll_to_top = False
 
+# 初期化フラグを使い、セッション開始時に強制的に全問0でリセット
+if 'initialized_once' not in st.session_state:
+    st.session_state.initialized_once = True
+    st.session_state.finished = False
+    st.session_state.answers = {i: 0 for i in range(len(questions_data))}
 
-def log_session_state(event: str):
-    pass # ログ出力は省略
+# デバッグ表示（最初の数問のstateを確認）
+with st.sidebar.expander("Debug: state", expanded=False):
+    preview_answers = [(i, st.session_state.answers.get(i, 0)) for i in range(min(10, len(questions_data)))]
+    st.write({f"Q{i+1}": v for i, v in preview_answers})
+    st.write({"finished": st.session_state.get("finished"), "gender": st.session_state.get("gender_input")})
+    st.write({"keys": list(st.session_state.keys())})
+    # 現在answersベースでの素点確認
+    score_debug = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
+    for q in questions_data:
+        score_debug[q["axis"]] += st.session_state.answers.get(q['id'], 0) * q["weight"]
+    st.write({"score_raw": score_debug})
 
-QUESTIONS_PER_PAGE = len(questions_data)
-TOTAL_PAGES = max(1, len(questions_data) // QUESTIONS_PER_PAGE)
+# セッション全消去ボタン（異常キャッシュリセット用）
+with st.sidebar:
+    if st.button("Reset session (hard)"):
+        for k in list(st.session_state.keys()):
+            del st.session_state[k]
+        st.rerun()
 
 def calculate_result():
-    scores = {"Energy": 0, "Mind": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
-    max_scores = {"Energy": 0, "Mind": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
+    # answersを正規化（不正値は0）
+    for q in questions_data:
+        qid = q['id']
+        val = st.session_state.answers.get(qid, 0)
+        if val not in OPTIONS:
+            val = 0
+        st.session_state.answers[qid] = int(val)
+
+    scores = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
+    max_scores = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
 
     for q in questions_data:
         qid = q['id']
         val = st.session_state.answers.get(qid, 0)
         axis = q.get("axis")
-        if axis not in scores:
-            continue
+        if axis not in scores: continue
         scores[axis] += val * q["weight"]
         max_scores[axis] += 3 * abs(q["weight"])
 
@@ -385,17 +306,15 @@ def calculate_result():
     details = {}
 
     def axis_letter_and_pct(score, max_score, pos_letter, neg_letter):
-        if max_score == 0:
-            return pos_letter, 0
+        if max_score == 0: return pos_letter, 0
         left_pct = ((score + max_score) / (2 * max_score)) * 100
         left_pct = min(100, max(0, left_pct))
-        right_pct = 100 - left_pct
-        if left_pct > right_pct:
+        if left_pct > (100 - left_pct):
             letter = pos_letter
             pct = int(round(left_pct))
-        elif right_pct > left_pct:
+        elif (100 - left_pct) > left_pct:
             letter = neg_letter
-            pct = int(round(right_pct))
+            pct = int(round(100 - left_pct))
         else:
             letter = pos_letter if score >= 0 else neg_letter
             pct = int(round(left_pct))
@@ -403,23 +322,23 @@ def calculate_result():
 
     letter, pct = axis_letter_and_pct(scores["Mind"], max_scores["Mind"], "E", "I")
     result_type += letter
-    details["意識"] = {"trait": "外向型" if letter == "E" else "内向型", "pct": pct, "letter": letter}
+    details["Mind"] = {"trait": "外向型" if letter == "E" else "内向型", "pct": pct, "letter": letter}
 
     letter, pct = axis_letter_and_pct(scores["Energy"], max_scores["Energy"], "N", "S")
     result_type += letter
-    details["エネルギー"] = {"trait": "直感型" if letter == "N" else "現実型", "pct": pct, "letter": letter}
+    details["Energy"] = {"trait": "直感型" if letter == "N" else "現実型", "pct": pct, "letter": letter}
 
     letter, pct = axis_letter_and_pct(scores["Nature"], max_scores["Nature"], "F", "T")
     result_type += letter
-    details["性質"] = {"trait": "感情型" if letter == "F" else "思考型", "pct": pct, "letter": letter}
+    details["Nature"] = {"trait": "道理型" if letter == "F" else "論理型", "pct": pct, "letter": letter}
 
     letter, pct = axis_letter_and_pct(scores["Tactics"], max_scores["Tactics"], "J", "P")
     result_type += letter
-    details["戦術"] = {"trait": "計画型" if letter == "J" else "探索型", "pct": pct, "letter": letter}
+    details["Tactics"] = {"trait": "計画型" if letter == "J" else "探索型", "pct": pct, "letter": letter}
 
     letter, pct = axis_letter_and_pct(scores["Identity"], max_scores["Identity"], "A", "T")
     result_type += "-" + letter
-    details["アイデンティティ"] = {"trait": "自己主張型" if letter == "A" else "慎重型", "pct": pct, "letter": letter}
+    details["Identity"] = {"trait": "自己主張型" if letter == "A" else "慎重型", "pct": pct, "letter": letter}
 
     return result_type, details
 
@@ -433,14 +352,46 @@ def generate_ai_context(result_type, details, gender):
     }
     return json.dumps(prompt_data, ensure_ascii=False)
 
+# --- 16タイプ分類（名称のみ） ---
+def get_type_info(result_type):
+    base_type = result_type.split("-")[0]
+    
+    color_nt = "#8867c0" # 紫
+    color_nf = "#41c46c" # 緑
+    color_sj = "#4298b4" # 青
+    color_sp = "#e4ae3a" # 黄
+
+    type_map = {
+        "INTJ": {"group": "建築家", "color": color_nt, "image": "intj.png"},
+        "INTP": {"group": "論理学者", "color": color_nt, "image": "intp.png"},
+        "ENTJ": {"group": "指揮官", "color": color_nt, "image": "entj.png"},
+        "ENTP": {"group": "討論者", "color": color_nt, "image": "entp.png"},
+        "INFJ": {"group": "提唱者", "color": color_nf, "image": "infj.png"},
+        "INFP": {"group": "仲介者", "color": color_nf, "image": "infp.png"},
+        "ENFJ": {"group": "主人公", "color": color_nf, "image": "enfj.png"},
+        "ENFP": {"group": "広報運動家", "color": color_nf, "image": "enfp.png"},
+        "ISTJ": {"group": "管理者", "color": color_sj, "image": "istj.png"},
+        "ISFJ": {"group": "擁護者", "color": color_sj, "image": "isfj.png"},
+        "ESTJ": {"group": "幹部", "color": color_sj, "image": "estj.png"},
+        "ESFJ": {"group": "領事官", "color": color_sj, "image": "esfj.png"},
+        "ISTP": {"group": "巨匠", "color": color_sp, "image": "istp.png"},
+        "ISFP": {"group": "冒険家", "color": color_sp, "image": "isfp.png"},
+        "ESTP": {"group": "起業家", "color": color_sp, "image": "estp.png"},
+        "ESFP": {"group": "エンターテイナー", "color": color_sp, "image": "esfp.png"},
+    }
+    return type_map.get(base_type, {"group": "診断結果", "color": "#333", "image": None})
+
 # ==========================================
-# 3. UI表示
+# 3. UI表示（色と％表示を復活させたバージョン）
 # ==========================================
 
 def display_progress_bar(label, left_text, right_text, percentage, is_left_dominant, color="#00ACC1"):
     pct = max(0, min(100, int(percentage)))
     dominant_text = left_text if is_left_dominant else right_text
+    
+    # ラベルと％表示
     st.markdown(f"<div style='display:flex; justify-content:space-between; align-items:center;'><strong>{label}</strong><div style='font-weight:bold;'>{dominant_text} {pct}%</div></div>", unsafe_allow_html=True)
+    
     col_l, col_bar, col_r = st.columns([2, 6, 2])
     with col_l:
         left_color = color if is_left_dominant else "#888"
@@ -455,6 +406,7 @@ def display_progress_bar(label, left_text, right_text, percentage, is_left_domin
             marker_left = f"calc({100 - pct}% - 8px)"
             fill_style = f"right:0; width:{pct}%;"
 
+        # HTMLによるカスタムバー描画
         bar_html = f"""
         <div style='position:relative; width:100%; height:18px; background:#eee; border-radius:10px; overflow:visible;'>
             <div style='position:absolute; top:0; bottom:0; {fill_style} background:linear-gradient({fill_dir}, {fill_color}, {fill_color}); border-radius:10px 10px 10px 10px;'></div>
@@ -466,183 +418,146 @@ def display_progress_bar(label, left_text, right_text, percentage, is_left_domin
         right_color = color if not is_left_dominant else "#888"
         st.markdown(f"<div style='text-align:left; color:{right_color}; font-weight:bold;'>{right_text}</div>", unsafe_allow_html=True)
 
-def handle_next():
-    start = st.session_state.page * QUESTIONS_PER_PAGE
-    end = start + QUESTIONS_PER_PAGE
-    for q in questions_data[start:end]:
-        key = f"radio_{q['id']}"
-        if key in st.session_state:
-            st.session_state.answers[q['id']] = st.session_state[key]
-    st.session_state.page += 1
-    st.session_state.scroll_to_top = True
+def render_result():
+    st.balloons()
+    result_type, details = calculate_result()
+    gender = st.session_state.get("gender_input", "回答しない")
+    ai_context = generate_ai_context(result_type, details, gender)
 
-def handle_prev():
-    start = st.session_state.page * QUESTIONS_PER_PAGE
-    end = start + QUESTIONS_PER_PAGE
-    for q in questions_data[start:end]:
-        key = f"radio_{q['id']}"
-        if key in st.session_state:
-            st.session_state.answers[q['id']] = st.session_state[key]
-    st.session_state.page -= 1
-    st.session_state.scroll_to_top = True
+    type_info = get_type_info(result_type)
+    theme_color = type_info["color"]
+    group_name = type_info["group"]
+    image_filename = type_info["image"]
 
-def handle_finish():
-    start = st.session_state.page * QUESTIONS_PER_PAGE
-    end = start + QUESTIONS_PER_PAGE
-    for q in questions_data[start:end]:
-        key = f"radio_{q['id']}"
-        if key in st.session_state:
-            st.session_state.answers[q['id']] = st.session_state[key]
-    st.session_state.finished = True
-    st.session_state.scroll_to_top = True
+    st.markdown("<h1 style='text-align: center;'>あなたの性格タイプ</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='text-align: center; color: {theme_color}; margin-bottom: 0;'>{group_name}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align: center; color: {theme_color}; font-size: 4em; margin-top: 0;'>{result_type}</h2>", unsafe_allow_html=True)
+    
+    col_img1, col_img2, col_img3 = st.columns([1, 2, 1])
+    with col_img2:
+        if image_filename:
+            try:
+                st.image(image_filename, width=300)
+            except:  # 画像が無い場合のフォールバック
+                st.write("No Image")
+        else:
+            st.write("No Image")
+    
+    st.markdown("---")
+    
+    colors = {
+        "Mind": "#00ACC1",      # teal
+        "Energy": "#FFA726",    # orange
+        "Nature": "#66BB6A",    # green
+        "Tactics": "#7E57C2",   # purple
+        "Identity": "#EF5350"   # red
+    }
+    
+    display_progress_bar("意識 (Mind)", "外向型 (E)", "内向型 (I)", details["Mind"]["pct"], details["Mind"]["letter"] == "E", color=colors["Mind"])
+    display_progress_bar("エネルギー (Energy)", "直感型 (N)", "現実型 (S)", details["Energy"]["pct"], details["Energy"]["letter"] == "N", color=colors["Energy"])
+    display_progress_bar("気質 (Nature)", "道理型 (F)", "論理型 (T)", details["Nature"]["pct"], details["Nature"]["letter"] == "F", color=colors["Nature"])
+    display_progress_bar("戦術 (Tactics)", "計画型 (J)", "探索型 (P)", details["Tactics"]["pct"], details["Tactics"]["letter"] == "J", color=colors["Tactics"])
+    display_progress_bar("アイデンティティ (Identity)", "自己主張型 (A)", "慎重型 (T)", details["Identity"]["pct"], details["Identity"]["letter"] == "A", color=colors["Identity"])
+
+    st.markdown("---")
+    
+    csv_data = {
+        "User_ID": ["User_001"],
+        "Result_Type": [result_type],
+        "Gender": [gender],
+        "AI_Prompt_JSON": [ai_context]
+    }
+    for key, val in details.items():
+        csv_data[f"{key}_Trait"] = [val["trait"]]
+        csv_data[f"{key}_Pct"] = [val["pct"]]
+    for q in questions_data:
+        qid = q["id"]
+        val = st.session_state.answers.get(qid, 0)
+        csv_data[f"Q{qid+1}"] = [val]
+    df = pd.DataFrame(csv_data)
+    csv = df.to_csv(index=False).encode('utf-8-sig')
+
+    st.markdown("### 📥 データのダウンロード")
+    st.download_button("診断結果CSVをダウンロード", data=csv, file_name=f'personality_{result_type}.csv', mime='text/csv')
+    
+    if st.button("最初からやり直す", use_container_width=True):
+        st.session_state.answers = {i: 0 for i in range(len(questions_data))}
+        st.session_state.finished = False
+        st.rerun()
+
 
 def main():
-    st.markdown("""
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() { window.scrollTo(0, 0); }, 100);
-        });
-    </script>
-    """, unsafe_allow_html=True)
-
-    if st.session_state.get('scroll_to_top', False):
-        st.markdown("""
-        <script>
-            const main = window.parent.document.querySelector('.main');
-            if (main) { main.scrollTop = 0; }
-            window.scrollTo(0, 0);
-        </script>
-        """, unsafe_allow_html=True)
-        st.session_state['scroll_to_top'] = False
-
+    # 完了フラグが立っていたら結果を表示して終了
     if st.session_state.finished:
-        st.balloons()
-        result_type, details = calculate_result()
-        gender = st.session_state.get("gender_input", "回答しない")
-        ai_context = generate_ai_context(result_type, details, gender)
-
-        st.markdown("<h1 style='text-align: center;'>あなたの性格タイプ</h1>", unsafe_allow_html=True)
-        st.markdown(f"<h2 style='text-align: center; color: #4CAF50; font-size: 4em;'>{result_type}</h2>", unsafe_allow_html=True)
-        st.markdown("---")
-        
-        colors = {
-            "意識": "#00ACC1",
-            "エネルギー": "#FFA726",
-            "性質": "#66BB6A",
-            "戦術": "#7E57C2",
-            "アイデンティティ": "#EF5350"
-        }
-        display_progress_bar("意識 (Mind)", "外向型 (E)", "内向型 (I)", details["意識"]["pct"], details["意識"]["letter"] == "E", color=colors["意識"])
-        display_progress_bar("エネルギー (Energy)", "直感型 (N)", "現実型 (S)", details["エネルギー"]["pct"], details["エネルギー"]["letter"] == "N", color=colors["エネルギー"])
-        display_progress_bar("性質 (Nature)", "感情型 (F)", "思考型 (T)", details["性質"]["pct"], details["性質"]["letter"] == "F", color=colors["性質"])
-        display_progress_bar("戦術 (Tactics)", "計画型 (J)", "探索型 (P)", details["戦術"]["pct"], details["戦術"]["letter"] == "J", color=colors["戦術"])
-        display_progress_bar("アイデンティティ (Identity)", "自己主張型 (A)", "慎重型 (T)", details["アイデンティティ"]["pct"], details["アイデンティティ"]["letter"] == "A", color=colors["アイデンティティ"])
-
-        st.markdown("---")
-        
-        csv_data = {
-            "User_ID": ["User_001"],
-            "Result_Type": [result_type],
-            "Gender": [gender],
-            "AI_Prompt_JSON": [ai_context]
-        }
-        for key, val in details.items():
-            csv_data[f"{key}_Trait"] = [val["trait"]]
-            csv_data[f"{key}_Pct"] = [val["pct"]]
-        for qid, val in st.session_state.answers.items():
-            csv_data[f"Q{qid+1}"] = [val]
-        df = pd.DataFrame(csv_data)
-        csv = df.to_csv(index=False).encode('utf-8-sig')
-
-        st.markdown("### 📥 データのダウンロード")
-        st.download_button("診断結果CSVをダウンロード", data=csv, file_name=f'personality_{result_type}.csv', mime='text/csv')
-        
-        if st.button("最初からやり直す"):
-            st.session_state.page = 0
-            st.session_state.answers = {i: 0 for i in range(len(questions_data))}
-            st.session_state.finished = False
-            log_session_state("reset")
-            st.rerun()
+        render_result()
         return
 
+    # --- 診断画面（全問1ページ表示） ---
     st.title("🧩 性格タイプ診断")
     
-    if st.session_state.page == 0:
-        st.info("以下の質問に対し、あなたの感覚に最も近いものを選択してください。")
-        st.markdown("<div class='gender-section'>", unsafe_allow_html=True)
-        st.markdown("### 👤 基本情報")
-        st.radio(
-            "性別（任意）",
-            ["男性", "女性", "その他", "回答しない"],
-            horizontal=True,
-            key="gender_input",
-            label_visibility="collapsed"
-        )
-        st.markdown("</div>", unsafe_allow_html=True)
-        st.markdown("---")
+    st.info("以下の60問の質問に対し、あなたの感覚に最も近いものを選択してください。")
     
-    start_idx = st.session_state.page * QUESTIONS_PER_PAGE
-    end_idx = start_idx + QUESTIONS_PER_PAGE
-    current_questions = questions_data[start_idx:end_idx]
+    # 性別選択
+    st.markdown("<div class='gender-section'>", unsafe_allow_html=True)
+    st.markdown("### 👤 基本情報")
+    st.session_state.gender_input = st.radio(
+        "性別（任意）", 
+        ["男性", "女性", "その他", "回答しない"], 
+        horizontal=True,
+        key="gender_radio_main"
+    )
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("---")
 
-    progress = (st.session_state.page) / TOTAL_PAGES
-    st.progress(progress)
-    st.caption(f"Page {st.session_state.page + 1} / {TOTAL_PAGES}")
+    # --- 質問一覧（スライダーで7段階選択） ---
+    for q in questions_data:
+        st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
+        c1, c2, c3 = st.columns([1.5, 7, 1.5])
 
-    with st.form(key=f"form_page_{st.session_state.page}"):
-        options = [-3, -2, -1, 0, 1, 2, 3]
-        
-        for q in current_questions:
-            st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
-            c1, c2, c3 = st.columns([1, 7, 1])
-            
-            with c1:
-                st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
-            with c2:
-                key_radio = f"radio_{q['id']}"
-                saved_val = st.session_state.answers.get(q['id'], 0)
-                
-                current_value = st.radio(
-                    f"質問 {q['id']}",
-                    options,
-                    index=options.index(saved_val),
-                    horizontal=True,
-                    format_func=lambda x: "",
-                    label_visibility="collapsed",
-                    key=key_radio
-                )
-                
-                # Note: Cloud issues handled via callback, but here we can just pass
-                pass
+        with c1:
+            st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
+        with c2:
+            key = f"slider_{q['id']}"
+            qid = q['id']
 
-            with c3:
-                st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
-            
-            st.markdown("<div style='margin-bottom: 30px;'></div>", unsafe_allow_html=True)
+            current_val = st.session_state.answers.get(qid, 0)
+            if current_val not in OPTIONS:
+                current_val = 0
 
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        is_last_page = (st.session_state.page == TOTAL_PAGES - 1)
-        
-        _, btn_col, _ = st.columns([2, 1, 2])
-        with btn_col:
-            if is_last_page:
-                submitted = st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=True)
-                if submitted:
-                    for q in current_questions:
-                        st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                    st.session_state.finished = True
-                    st.session_state['scroll_to_top'] = True
-                    log_session_state("finished")
-                    st.rerun()
-            else:
-                if st.form_submit_button("次へ ＞", type="primary", use_container_width=True):
-                    for q in current_questions:
-                        st.session_state.answers[q['id']] = st.session_state[f"radio_{q['id']}"]
-                    st.session_state['scroll_to_top'] = True
-                    st.session_state.page += 1
-                    log_session_state("next_page")
-                    st.rerun()
+            selected = st.select_slider(
+                f"q_{qid}",
+                options=OPTIONS,
+                value=current_val,
+                label_visibility="collapsed",
+                key=key
+            )
+
+            st.session_state.answers[qid] = int(selected)
+
+        with c3:
+            st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
+
+        # 区切り線
+        if (q['id'] + 1) % 5 == 0 and (q['id'] + 1) != len(questions_data):
+            st.markdown("<hr style='margin: 30px 0; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
+        else:
+            st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # 送信ボタン（中央寄せ）
+    _, center_col, _ = st.columns([1, 2, 1])
+    with center_col:
+        if st.button("診断結果を見る ＞", type="primary", use_container_width=True):
+            # 送信直前に全回答を確定保存（Cloudでラジオstateが消えても計算可能にする）
+            for q in questions_data:
+                qid = q["id"]
+                val = st.session_state.answers.get(qid, 0)
+                if val not in OPTIONS:
+                    val = 0
+                st.session_state.answers[qid] = int(val)
+            st.session_state.finished = True
+            st.rerun()
 
 if __name__ == "__main__":
     main()
