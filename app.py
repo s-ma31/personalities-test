@@ -260,6 +260,13 @@ with st.sidebar.expander("Debug: state", expanded=False):
     preview_answers = [(i, st.session_state.answers.get(i, 0)) for i in range(min(10, len(questions_data)))]
     st.write({f"Q{i+1}": v for i, v in preview_answers})
     st.write({"finished": st.session_state.get("finished"), "gender": st.session_state.get("gender_input")})
+    preview_radios = [(i, st.session_state.get(f"radio_{i}")) for i in range(min(10, len(questions_data)))]
+    st.write({f"radio_{i+1}": v for i, v in preview_radios})
+    # 現在answersベースでの素点確認
+    score_debug = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
+    for q in questions_data:
+        score_debug[q["axis"]] += st.session_state.answers.get(q['id'], 0) * q["weight"]
+    st.write({"score_raw": score_debug})
 
 def calculate_result():
     # ラジオstateをanswersに同期（Cloudでの再実行でも最新を使う）
