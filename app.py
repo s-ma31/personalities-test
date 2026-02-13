@@ -261,8 +261,8 @@ def calculate_result():
 
     for q in questions_data:
         qid = q['id']
-        # Streamlit Cloudでも確実に拾えるよう、各ラジオのstateを直接参照
-        val = st.session_state.get(f"radio_{qid}", st.session_state.answers.get(qid, 0))
+        # 直近の回答はanswersに正規化して保存している想定
+        val = st.session_state.answers.get(qid, 0)
         axis = q.get("axis")
         if axis not in scores: continue
         scores[axis] += val * q["weight"]
@@ -438,7 +438,7 @@ def render_result():
         csv_data[f"{key}_Pct"] = [val["pct"]]
     for q in questions_data:
         qid = q["id"]
-        val = st.session_state.get(f"radio_{qid}", st.session_state.answers.get(qid, 0))
+        val = st.session_state.answers.get(qid, 0)
         csv_data[f"Q{qid+1}"] = [val]
     df = pd.DataFrame(csv_data)
     csv = df.to_csv(index=False).encode('utf-8-sig')
@@ -506,7 +506,7 @@ def main():
                 key=key
             )
             
-            # 選択値をanswersに保存（毎回）
+            # 選択値をanswersにも保存（Widget state消失対策）
             st.session_state.answers[qid] = selected
             
         with c3:
