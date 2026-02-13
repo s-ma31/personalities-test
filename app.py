@@ -250,6 +250,7 @@ for i, q in enumerate(questions_data):
 if 'finished' not in st.session_state:
     st.session_state.finished = False
 if 'answers' not in st.session_state:
+    # answersは後方互換用。実際の値は各ラジオボタンのstateを参照する。
     st.session_state.answers = {i: 0 for i in range(len(questions_data))}
 if 'gender_input' not in st.session_state:
     st.session_state.gender_input = "回答しない"
@@ -260,7 +261,8 @@ def calculate_result():
 
     for q in questions_data:
         qid = q['id']
-        val = st.session_state.answers.get(qid, 0)
+        # Streamlit Cloudでも確実に拾えるよう、各ラジオのstateを直接参照
+        val = st.session_state.get(f"radio_{qid}", st.session_state.answers.get(qid, 0))
         axis = q.get("axis")
         if axis not in scores: continue
         scores[axis] += val * q["weight"]
@@ -382,73 +384,80 @@ def display_progress_bar(label, left_text, right_text, percentage, is_left_domin
         right_color = color if not is_left_dominant else "#888"
         st.markdown(f"<div style='text-align:left; color:{right_color}; font-weight:bold;'>{right_text}</div>", unsafe_allow_html=True)
 
-def main():
-    # 完了画面の処理
-    if st.session_state.finished:
-        st.balloons()
-        result_type, details = calculate_result()
-        gender = st.session_state.get("gender_input", "回答しない")
-        ai_context = generate_ai_context(result_type, details, gender)
+def render_result():
+    st.balloons()
+    result_type, details = calculate_result()
+    gender = st.session_state.get("gender_input", "回答しない")
+    ai_context = generate_ai_context(result_type, details, gender)
 
-        type_info = get_type_info(result_type)
-        theme_color = type_info["color"]
-        group_name = type_info["group"]
-        image_filename = type_info["image"]
+    type_info = get_type_info(result_type)
+    theme_color = type_info["color"]
+    group_name = type_info["group"]
+    image_filename = type_info["image"]
 
-        st.markdown("<h1 style='text-align: center;'>あなたの性格タイプ</h1>", unsafe_allow_html=True)
-        st.markdown(f"<h3 style='text-align: center; color: {theme_color}; margin-bottom: 0;'>{group_name}</h3>", unsafe_allow_html=True)
-        st.markdown(f"<h2 style='text-align: center; color: {theme_color}; font-size: 4em; margin-top: 0;'>{result_type}</h2>", unsafe_allow_html=True)
-        
-        col_img1, col_img2, col_img3 = st.columns([1, 2, 1])
-        with col_img2:
-            if image_filename:
-                try:
-                    st.image(image_filename, width=300)
-                except:
-                    st.write("No Image")
-            else:
+    st.markdown("<h1 style='text-align: center;'>あなたの性格タイプ</h1>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='text-align: center; color: {theme_color}; margin-bottom: 0;'>{group_name}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h2 style='text-align: center; color: {theme_color}; font-size: 4em; margin-top: 0;'>{result_type}</h2>", unsafe_allow_html=True)
+    
+    col_img1, col_img2, col_img3 = st.columns([1, 2, 1])
+    with col_img2:
+        if image_filename:
+            try:
+                st.image(image_filename, width=300)
+            except:  # 画像が無い場合のフォールバック
                 st.write("No Image")
-        
-        st.markdown("---")
-        
-        # カラー定義（結果表示用）
-        colors = {
-            "Mind": "#00ACC1",      # teal
-            "Energy": "#FFA726",    # orange
-            "Nature": "#66BB6A",    # green
-            "Tactics": "#7E57C2",   # purple
-            "Identity": "#EF5350"   # red
-        }
-        
-        display_progress_bar("意識 (Mind)", "外向型 (E)", "内向型 (I)", details["Mind"]["pct"], details["Mind"]["letter"] == "E", color=colors["Mind"])
-        display_progress_bar("エネルギー (Energy)", "直感型 (N)", "現実型 (S)", details["Energy"]["pct"], details["Energy"]["letter"] == "N", color=colors["Energy"])
-        display_progress_bar("気質 (Nature)", "道理型 (F)", "論理型 (T)", details["Nature"]["pct"], details["Nature"]["letter"] == "F", color=colors["Nature"])
-        display_progress_bar("戦術 (Tactics)", "計画型 (J)", "探索型 (P)", details["Tactics"]["pct"], details["Tactics"]["letter"] == "J", color=colors["Tactics"])
-        display_progress_bar("アイデンティティ (Identity)", "自己主張型 (A)", "慎重型 (T)", details["Identity"]["pct"], details["Identity"]["letter"] == "A", color=colors["Identity"])
+        else:
+            st.write("No Image")
+    
+    st.markdown("---")
+    
+    colors = {
+        "Mind": "#00ACC1",      # teal
+        "Energy": "#FFA726",    # orange
+        "Nature": "#66BB6A",    # green
+        "Tactics": "#7E57C2",   # purple
+        "Identity": "#EF5350"   # red
+    }
+    
+    display_progress_bar("意識 (Mind)", "外向型 (E)", "内向型 (I)", details["Mind"]["pct"], details["Mind"]["letter"] == "E", color=colors["Mind"])
+    display_progress_bar("エネルギー (Energy)", "直感型 (N)", "現実型 (S)", details["Energy"]["pct"], details["Energy"]["letter"] == "N", color=colors["Energy"])
+    display_progress_bar("気質 (Nature)", "道理型 (F)", "論理型 (T)", details["Nature"]["pct"], details["Nature"]["letter"] == "F", color=colors["Nature"])
+    display_progress_bar("戦術 (Tactics)", "計画型 (J)", "探索型 (P)", details["Tactics"]["pct"], details["Tactics"]["letter"] == "J", color=colors["Tactics"])
+    display_progress_bar("アイデンティティ (Identity)", "自己主張型 (A)", "慎重型 (T)", details["Identity"]["pct"], details["Identity"]["letter"] == "A", color=colors["Identity"])
 
-        st.markdown("---")
-        
-        csv_data = {
-            "User_ID": ["User_001"],
-            "Result_Type": [result_type],
-            "Gender": [gender],
-            "AI_Prompt_JSON": [ai_context]
-        }
-        for key, val in details.items():
-            csv_data[f"{key}_Trait"] = [val["trait"]]
-            csv_data[f"{key}_Pct"] = [val["pct"]]
-        for qid, val in st.session_state.answers.items():
-            csv_data[f"Q{qid+1}"] = [val]
-        df = pd.DataFrame(csv_data)
-        csv = df.to_csv(index=False).encode('utf-8-sig')
+    st.markdown("---")
+    
+    csv_data = {
+        "User_ID": ["User_001"],
+        "Result_Type": [result_type],
+        "Gender": [gender],
+        "AI_Prompt_JSON": [ai_context]
+    }
+    for key, val in details.items():
+        csv_data[f"{key}_Trait"] = [val["trait"]]
+        csv_data[f"{key}_Pct"] = [val["pct"]]
+    for q in questions_data:
+        qid = q["id"]
+        val = st.session_state.get(f"radio_{qid}", st.session_state.answers.get(qid, 0))
+        csv_data[f"Q{qid+1}"] = [val]
+    df = pd.DataFrame(csv_data)
+    csv = df.to_csv(index=False).encode('utf-8-sig')
 
-        st.markdown("### 📥 データのダウンロード")
-        st.download_button("診断結果CSVをダウンロード", data=csv, file_name=f'personality_{result_type}.csv', mime='text/csv')
-        
-        if st.button("最初からやり直す", use_container_width=True):
-            st.session_state.answers = {i: 0 for i in range(len(questions_data))}
-            st.session_state.finished = False
-            st.rerun()
+    st.markdown("### 📥 データのダウンロード")
+    st.download_button("診断結果CSVをダウンロード", data=csv, file_name=f'personality_{result_type}.csv', mime='text/csv')
+    
+    if st.button("最初からやり直す", use_container_width=True):
+        st.session_state.answers = {i: 0 for i in range(len(questions_data))}
+        for q in questions_data:
+            st.session_state.pop(f"radio_{q['id']}", None)
+        st.session_state.finished = False
+        st.rerun()
+
+
+def main():
+    # 完了フラグが立っていたら結果を表示して終了
+    if st.session_state.finished:
+        render_result()
         return
 
     # --- 診断画面（全問1ページ表示） ---
@@ -482,7 +491,9 @@ def main():
             qid = q['id']
             
             # 現在の回答値を取得
-            current_val = st.session_state.answers.get(qid, 0)
+            current_val = st.session_state.get(key, st.session_state.answers.get(qid, 0))
+            if current_val not in options:
+                current_val = 0
             
             # ラジオボタンで選択（on_changeで即座に保存）
             selected = st.radio(
