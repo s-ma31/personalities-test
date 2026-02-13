@@ -249,8 +249,11 @@ for i, q in enumerate(questions_data):
 
 if 'finished' not in st.session_state:
     st.session_state.finished = False
+# ラジオ選択肢（文字列で保持し、計算時にintへ変換）
+OPTIONS = ["-3", "-2", "-1", "0", "1", "2", "3"]
+
 if 'answers' not in st.session_state:
-    # answersは後方互換用。実際の値は各ラジオボタンのstateを参照する。
+    # answersはint値で保持
     st.session_state.answers = {i: 0 for i in range(len(questions_data))}
 if 'gender_input' not in st.session_state:
     st.session_state.gender_input = "回答しない"
@@ -261,14 +264,13 @@ if 'initialized_once' not in st.session_state:
     st.session_state.finished = False
     st.session_state.answers = {i: 0 for i in range(len(questions_data))}
     for q in questions_data:
-        st.session_state[f"radio_{q['id']}"] = 0
+        st.session_state[f"radio_{q['id']}"] = "0"
 
-# ラジオstateの初期化と補正（Cloudで未知の初期値が入る場合に備える）
-options = [-3, -2, -1, 0, 1, 2, 3]
+# ラジオstateの初期化と補正（文字列で管理）
 for q in questions_data:
     rk = f"radio_{q['id']}"
-    if rk not in st.session_state or st.session_state.get(rk) not in options:
-        st.session_state[rk] = 0
+    if rk not in st.session_state or st.session_state.get(rk) not in OPTIONS:
+        st.session_state[rk] = "0"
 
 # デバッグ表示（最初の数問のstateを確認）
 with st.sidebar.expander("Debug: state", expanded=False):
@@ -277,21 +279,34 @@ with st.sidebar.expander("Debug: state", expanded=False):
     st.write({"finished": st.session_state.get("finished"), "gender": st.session_state.get("gender_input")})
     preview_radios = [(i, st.session_state.get(f"radio_{i}")) for i in range(min(10, len(questions_data)))]
     st.write({f"radio_{i+1}": v for i, v in preview_radios})
+    st.write({"keys": list(st.session_state.keys())})
     # 現在answersベースでの素点確認
     score_debug = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
     for q in questions_data:
         score_debug[q["axis"]] += st.session_state.answers.get(q['id'], 0) * q["weight"]
     st.write({"score_raw": score_debug})
 
+# セッション全消去ボタン（異常キャッシュリセット用）
+with st.sidebar:
+    if st.button("Reset session (hard)"):
+        for k in list(st.session_state.keys()):
+            del st.session_state[k]
+        st.rerun()
+
 def calculate_result():
     # ラジオstateをanswersに同期（Cloudでの再実行でも最新を使う）
     for q in questions_data:
         qid = q['id']
-        val = st.session_state.get(f"radio_{qid}", st.session_state.answers.get(qid, 0))
-        if val not in options:
+        rk = f"radio_{qid}"
+        raw = st.session_state.get(rk, st.session_state.answers.get(qid, "0"))
+        if raw not in OPTIONS:
+            raw = "0"
+        try:
+            val = int(raw)
+        except Exception:
             val = 0
         st.session_state.answers[qid] = val
-        st.session_state[f"radio_{qid}"] = val
+        st.session_state[rk] = raw
 
     scores = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
     max_scores = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
@@ -514,7 +529,6 @@ def main():
     st.markdown("---")
 
     # --- 質問一覧（フォームなし・コールバックで保存） ---
-    options = [-3, -2, -1, 0, 1, 2, 3]
     
     for q in questions_data:
         st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
@@ -527,15 +541,15 @@ def main():
             qid = q['id']
             
             # 現在の回答値を取得
-            current_val = st.session_state.get(key, st.session_state.answers.get(qid, 0))
-            if current_val not in options:
-                current_val = 0
+            current_val = st.session_state.get(key, str(st.session_state.answers.get(qid, 0)))
+            if current_val not in OPTIONS:
+                current_val = "0"
             
             # ラジオボタンで選択（on_changeで即座に保存）
             selected = st.radio(
                 f"q_{qid}",
-                options,
-                index=options.index(current_val),
+                OPTIONS,
+                index=OPTIONS.index(current_val),
                 horizontal=True,
                 format_func=lambda x: "",
                 label_visibility="collapsed",
@@ -543,7 +557,10 @@ def main():
             )
             
             # 選択値をanswersにも保存（Widget state消失対策）
-            st.session_state.answers[qid] = selected
+            try:
+                st.session_state.answers[qid] = int(selected)
+            except Exception:
+                st.session_state.answers[qid] = 0
             
         with c3:
             st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
@@ -563,7 +580,13 @@ def main():
             # 送信直前に全回答を確定保存（Cloudでラジオstateが消えても計算可能にする）
             for q in questions_data:
                 qid = q["id"]
-                st.session_state.answers[qid] = st.session_state.get(f"radio_{qid}", st.session_state.answers.get(qid, 0))
+                raw = st.session_state.get(f"radio_{qid}", "0")
+                if raw not in OPTIONS:
+                    raw = "0"
+                try:
+                    st.session_state.answers[qid] = int(raw)
+                except Exception:
+                    st.session_state.answers[qid] = 0
             st.session_state.finished = True
             st.rerun()
 
