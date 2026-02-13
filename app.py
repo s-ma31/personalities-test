@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import datetime
 import math
+from pathlib import Path
 
 # ==========================================
 # 0. 設定とCSSスタイル定義
@@ -339,6 +340,7 @@ def generate_ai_context(result_type, details, gender):
 # --- 16タイプ分類（名称のみ） ---
 def get_type_info(result_type):
     base_type = result_type.split("-")[0]
+    base_dir = Path(__file__).parent
     
     color_nt = "#8867c0" # 紫
     color_nf = "#41c46c" # 緑
@@ -346,24 +348,27 @@ def get_type_info(result_type):
     color_sp = "#e4ae3a" # 黄
 
     type_map = {
-        "INTJ": {"group": "建築家", "color": color_nt, "image": "intj.png"},
-        "INTP": {"group": "論理学者", "color": color_nt, "image": "intp.png"},
-        "ENTJ": {"group": "指揮官", "color": color_nt, "image": "entj.png"},
-        "ENTP": {"group": "討論者", "color": color_nt, "image": "entp.png"},
-        "INFJ": {"group": "提唱者", "color": color_nf, "image": "infj.png"},
-        "INFP": {"group": "仲介者", "color": color_nf, "image": "infp.png"},
-        "ENFJ": {"group": "主人公", "color": color_nf, "image": "enfj.png"},
-        "ENFP": {"group": "広報運動家", "color": color_nf, "image": "enfp.png"},
-        "ISTJ": {"group": "管理者", "color": color_sj, "image": "istj.png"},
-        "ISFJ": {"group": "擁護者", "color": color_sj, "image": "isfj.png"},
-        "ESTJ": {"group": "幹部", "color": color_sj, "image": "estj.png"},
-        "ESFJ": {"group": "領事官", "color": color_sj, "image": "esfj.png"},
-        "ISTP": {"group": "巨匠", "color": color_sp, "image": "istp.png"},
-        "ISFP": {"group": "冒険家", "color": color_sp, "image": "isfp.png"},
-        "ESTP": {"group": "起業家", "color": color_sp, "image": "estp.png"},
-        "ESFP": {"group": "エンターテイナー", "color": color_sp, "image": "esfp.png"},
+        "INTJ": {"group": "建築家", "color": color_nt},
+        "INTP": {"group": "論理学者", "color": color_nt},
+        "ENTJ": {"group": "指揮官", "color": color_nt},
+        "ENTP": {"group": "討論者", "color": color_nt},
+        "INFJ": {"group": "提唱者", "color": color_nf},
+        "INFP": {"group": "仲介者", "color": color_nf},
+        "ENFJ": {"group": "主人公", "color": color_nf},
+        "ENFP": {"group": "広報運動家", "color": color_nf},
+        "ISTJ": {"group": "管理者", "color": color_sj},
+        "ISFJ": {"group": "擁護者", "color": color_sj},
+        "ESTJ": {"group": "幹部", "color": color_sj},
+        "ESFJ": {"group": "領事官", "color": color_sj},
+        "ISTP": {"group": "巨匠", "color": color_sp},
+        "ISFP": {"group": "冒険家", "color": color_sp},
+        "ESTP": {"group": "起業家", "color": color_sp},
+        "ESFP": {"group": "エンターテイナー", "color": color_sp},
     }
-    return type_map.get(base_type, {"group": "診断結果", "color": "#333", "image": None})
+    info = type_map.get(base_type, {"group": "診断結果", "color": "#333"})
+    # スクリプトディレクトリ基準で images/TYPE.png を指す
+    info["image"] = str((base_dir / "images" / f"{base_type.lower()}.png").as_posix())
+    return info
 
 # ==========================================
 # 3. UI表示（色と％表示を復活させたバージョン）
@@ -415,14 +420,15 @@ def render_result():
 
     st.markdown("<h1 style='text-align: center;'>あなたの性格タイプ</h1>", unsafe_allow_html=True)
     st.markdown(f"<h3 style='text-align: center; color: {theme_color}; margin-bottom: 0;'>{group_name}</h3>", unsafe_allow_html=True)
+
     st.markdown(f"<h2 style='text-align: center; color: {theme_color}; font-size: 4em; margin-top: 0;'>{result_type}</h2>", unsafe_allow_html=True)
-    
-    col_img1, col_img2, col_img3 = st.columns([1, 2, 1])
-    with col_img2:
+
+    img_col = st.columns([1, 1, 1])[1]
+    with img_col:
         if image_filename:
             try:
-                st.image(image_filename, width=300)
-            except:  # 画像が無い場合のフォールバック
+                st.image(image_filename, width=220)
+            except:
                 st.write("No Image")
         else:
             st.write("No Image")
@@ -533,11 +539,8 @@ def main():
         with c3:
             st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
 
-        # 区切り線
-        if (q['id'] + 1) % 5 == 0 and (q['id'] + 1) != len(questions_data):
-            st.markdown("<hr style='margin: 30px 0; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
-        else:
-            st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
+        # 区切り線を廃止し、余白のみ付与
+        st.markdown("<div style='margin-bottom: 32px;'></div>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     
