@@ -383,8 +383,6 @@ def display_progress_bar(label, left_text, right_text, percentage, is_left_domin
         st.markdown(f"<div style='text-align:left; color:{right_color}; font-weight:bold;'>{right_text}</div>", unsafe_allow_html=True)
 
 def main():
-    st.write("DEBUG answers:", st.session_state.answers)
-    st.markdown("""<script>document.addEventListner...""")
     # 完了画面の処理
     if st.session_state.finished:
         st.balloons()
@@ -470,57 +468,60 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("---")
 
-    # --- 質問一覧 ---
-    options = [-3, -2, -1, 0, 1, 2, 3]
-    
-    for q in questions_data:
-        st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
-        c1, c2, c3 = st.columns([1.5, 7, 1.5])
+    # --- 質問一覧（フォームで囲む：これが重要！） ---
+    with st.form("personality_quiz_form"):
+        options = [-3, -2, -1, 0, 1, 2, 3]
         
-        with c1:
-            st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
-        with c2:
-            current_val = st.session_state.answers.get(q['id'], 0)
+        for q in questions_data:
+            st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
+            c1, c2, c3 = st.columns([1.5, 7, 1.5])
             
-            # シンプルなラジオボタン（on_changeなし）
-            st.radio(
-                f"q_{q['id']}",
-                options,
-                index=options.index(current_val),
-                horizontal=True,
-                format_func=lambda x: "",
-                label_visibility="collapsed",
-                key=f"radio_{q['id']}"
-            )
-        with c3:
-            st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
-        
-        # 区切り線
-        if (q['id'] + 1) % 5 == 0 and (q['id'] + 1) != len(questions_data):
-            st.markdown("<hr style='margin: 30px 0; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
-        else:
-            st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
+            with c1:
+                st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
+            with c2:
+                current_val = st.session_state.answers.get(q['id'], 0)
+                
+                st.radio(
+                    f"q_{q['id']}",
+                    options,
+                    index=options.index(current_val),
+                    horizontal=True,
+                    format_func=lambda x: "",
+                    label_visibility="collapsed",
+                    key=f"radio_{q['id']}"
+                )
+            with c3:
+                st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
+            
+            # 区切り線
+            if (q['id'] + 1) % 5 == 0 and (q['id'] + 1) != len(questions_data):
+                st.markdown("<hr style='margin: 30px 0; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
+            else:
+                st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # フォーム送信ボタン（中央寄せ）
+        _, center_col, _ = st.columns([1, 2, 1])
+        with center_col:
+            submitted = st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=True)
     
-    # ボタン配置 (中央寄せ)
-    _, center_col, _ = st.columns([1, 2, 1])
-    with center_col:
-        if st.button("診断結果を見る ＞", type="primary", use_container_width=True):
-            # ボタン押下時に全ての値を確実に保存
-            saved_count = 0
-            for q in questions_data:
-                key = f"radio_{q['id']}"
-                if key in st.session_state:
-                    st.session_state.answers[q['id']] = st.session_state[key]
-                    saved_count += 1
-            
-            # デバッグ用（一時的に表示）
-            st.write(f"DEBUG: {saved_count}個の回答を保存しました")
-            st.write("サンプル回答:", {k: st.session_state.answers.get(k) for k in range(5)})
-            
-            st.session_state.finished = True
-            st.rerun()
+    # フォーム外で処理
+    if submitted:
+        # ボタン押下時に全ての値を確実に保存
+        saved_count = 0
+        for q in questions_data:
+            key = f"radio_{q['id']}"
+            if key in st.session_state:
+                st.session_state.answers[q['id']] = st.session_state[key]
+                saved_count += 1
+        
+        # デバッグ用（一時的に表示）
+        st.write(f"✅ DEBUG: {saved_count}個の回答を保存しました")
+        st.write("サンプル回答:", {k: st.session_state.answers.get(k) for k in range(5)})
+        
+        st.session_state.finished = True
+        st.rerun()
 
 if __name__ == "__main__":
     main()
