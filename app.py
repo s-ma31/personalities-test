@@ -468,10 +468,8 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("---")
 
-    # --- 質問一覧（フォームで囲む：これが重要！） ---
-    st.write("🔍 フォームのテスト: この文字が見えますか？")
+    # --- 質問一覧（フォームで囲む） ---
     with st.form("personality_quiz_form"):
-        st.write("📝 フォームの中です")
         options = [-3, -2, -1, 0, 1, 2, 3]
         
         for q in questions_data:
@@ -481,16 +479,19 @@ def main():
             with c1:
                 st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
             with c2:
-                current_val = st.session_state.answers.get(q['id'], 0)
+                # keyのみ指定し、indexは指定しない（session_stateから自動取得）
+                key = f"radio_{q['id']}"
+                # 初回のみデフォルト値を設定
+                if key not in st.session_state:
+                    st.session_state[key] = 0
                 
                 st.radio(
                     f"q_{q['id']}",
                     options,
-                    index=options.index(current_val),
                     horizontal=True,
                     format_func=lambda x: "",
                     label_visibility="collapsed",
-                    key=f"radio_{q['id']}"
+                    key=key
                 )
             with c3:
                 st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
@@ -510,21 +511,14 @@ def main():
     
     # フォーム外で処理
     if submitted:
-        # ボタン押下時に全ての値を確実に保存
-        saved_count = 0
+        # フォーム送信時に全ての値を answers にコピー
         for q in questions_data:
             key = f"radio_{q['id']}"
             if key in st.session_state:
                 st.session_state.answers[q['id']] = st.session_state[key]
-                saved_count += 1
-        
-        # デバッグ用（一時的に表示）
-        st.write(f"✅ DEBUG: {saved_count}個の回答を保存しました")
-        st.write("サンプル回答:", {k: st.session_state.answers.get(k) for k in range(5)})
         
         st.session_state.finished = True
         st.rerun()
 
 if __name__ == "__main__":
     main()
-
