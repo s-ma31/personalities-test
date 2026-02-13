@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import json
 import datetime
+import math
 
 # ==========================================
 # 0. 設定とCSSスタイル定義
@@ -256,6 +257,8 @@ if 'answers' not in st.session_state:
     st.session_state.answers = {i: 0 for i in range(len(questions_data))}
 if 'gender_input' not in st.session_state:
     st.session_state.gender_input = "回答しない"
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = 0
 
 # 初期化フラグを使い、セッション開始時に強制的に全問0でリセット
 if 'initialized_once' not in st.session_state:
@@ -490,8 +493,20 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("---")
 
+    # --- ページング設定 ---
+    questions_per_page = 6
+    total_pages = math.ceil(len(questions_data) / questions_per_page)
+    current_page = st.session_state.current_page
+    current_page = max(0, min(total_pages - 1, current_page))
+    st.session_state.current_page = current_page
+
+    start_idx = current_page * questions_per_page
+    end_idx = min(start_idx + questions_per_page, len(questions_data))
+    st.markdown(f"#### 質問ページ {current_page + 1} / {total_pages}")
+    st.progress((current_page + 1) / total_pages)
+
     # --- 質問一覧（スライダーで7段階選択） ---
-    for q in questions_data:
+    for q in questions_data[start_idx:end_idx]:
         st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
         c1, c2, c3 = st.columns([1.5, 7, 1.5])
 
@@ -526,19 +541,29 @@ def main():
 
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # 送信ボタン（中央寄せ）
-    _, center_col, _ = st.columns([1, 2, 1])
-    with center_col:
-        if st.button("診断結果を見る ＞", type="primary", use_container_width=True):
-            # 送信直前に全回答を確定保存（Cloudでラジオstateが消えても計算可能にする）
-            for q in questions_data:
-                qid = q["id"]
-                val = st.session_state.answers.get(qid, 0)
-                if val not in OPTIONS:
-                    val = 0
-                st.session_state.answers[qid] = int(val)
-            st.session_state.finished = True
+    # ナビゲーションと送信ボタン
+    nav_left, nav_mid, nav_right = st.columns([1, 2, 1])
+    with nav_left:
+        if st.button("＜ 前へ", disabled=current_page == 0, use_container_width=True):
+            st.session_state.current_page = max(0, current_page - 1)
             st.rerun()
+    with nav_right:
+        if st.button("次へ ＞", disabled=current_page >= total_pages - 1, use_container_width=True):
+            st.session_state.current_page = min(total_pages - 1, current_page + 1)
+            st.rerun()
+
+    if current_page == total_pages - 1:
+        _, submit_col, _ = st.columns([1, 2, 1])
+        with submit_col:
+            if st.button("診断結果を見る ＞", type="primary", use_container_width=True):
+                for q in questions_data:
+                    qid = q["id"]
+                    val = st.session_state.answers.get(qid, 0)
+                    if val not in OPTIONS:
+                        val = 0
+                    st.session_state.answers[qid] = int(val)
+                st.session_state.finished = True
+                st.rerun()
 
 if __name__ == "__main__":
     main()
