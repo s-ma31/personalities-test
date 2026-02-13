@@ -255,6 +255,14 @@ if 'answers' not in st.session_state:
 if 'gender_input' not in st.session_state:
     st.session_state.gender_input = "回答しない"
 
+# 初期化フラグを使い、セッション開始時に強制的に全問0でリセット
+if 'initialized_once' not in st.session_state:
+    st.session_state.initialized_once = True
+    st.session_state.finished = False
+    st.session_state.answers = {i: 0 for i in range(len(questions_data))}
+    for q in questions_data:
+        st.session_state[f"radio_{q['id']}"] = 0
+
 # ラジオstateの初期化と補正（Cloudで未知の初期値が入る場合に備える）
 options = [-3, -2, -1, 0, 1, 2, 3]
 for q in questions_data:
