@@ -468,57 +468,53 @@ def main():
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown("---")
 
-    # --- 質問一覧（フォームで囲む） ---
-    with st.form("personality_quiz_form"):
-        options = [-3, -2, -1, 0, 1, 2, 3]
-        
-        for q in questions_data:
-            st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
-            c1, c2, c3 = st.columns([1.5, 7, 1.5])
-            
-            with c1:
-                st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
-            with c2:
-                # keyのみ指定し、indexは指定しない（session_stateから自動取得）
-                key = f"radio_{q['id']}"
-                # 初回のみデフォルト値を設定
-                if key not in st.session_state:
-                    st.session_state[key] = 0
-                
-                st.radio(
-                    f"q_{q['id']}",
-                    options,
-                    horizontal=True,
-                    format_func=lambda x: "",
-                    label_visibility="collapsed",
-                    key=key
-                )
-            with c3:
-                st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
-            
-            # 区切り線
-            if (q['id'] + 1) % 5 == 0 and (q['id'] + 1) != len(questions_data):
-                st.markdown("<hr style='margin: 30px 0; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
-            else:
-                st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        # フォーム送信ボタン（中央寄せ）
-        _, center_col, _ = st.columns([1, 2, 1])
-        with center_col:
-            submitted = st.form_submit_button("診断結果を見る ＞", type="primary", use_container_width=True)
+    # --- 質問一覧（フォームなし・コールバックで保存） ---
+    options = [-3, -2, -1, 0, 1, 2, 3]
     
-    # フォーム外で処理
-    if submitted:
-        # フォーム送信時に全ての値を answers にコピー
-        for q in questions_data:
-            key = f"radio_{q['id']}"
-            if key in st.session_state:
-                st.session_state.answers[q['id']] = st.session_state[key]
+    for q in questions_data:
+        st.markdown(f"<div class='question-text'>{q['text']}</div>", unsafe_allow_html=True)
+        c1, c2, c3 = st.columns([1.5, 7, 1.5])
         
-        st.session_state.finished = True
-        st.rerun()
+        with c1:
+            st.markdown("<div class='disagree-label'>同意しない</div>", unsafe_allow_html=True)
+        with c2:
+            key = f"radio_{q['id']}"
+            qid = q['id']
+            
+            # 現在の回答値を取得
+            current_val = st.session_state.answers.get(qid, 0)
+            
+            # ラジオボタンで選択（on_changeで即座に保存）
+            selected = st.radio(
+                f"q_{qid}",
+                options,
+                index=options.index(current_val),
+                horizontal=True,
+                format_func=lambda x: "",
+                label_visibility="collapsed",
+                key=key
+            )
+            
+            # 選択値をanswersに保存（毎回）
+            st.session_state.answers[qid] = selected
+            
+        with c3:
+            st.markdown("<div class='agree-label'>同意する</div>", unsafe_allow_html=True)
+        
+        # 区切り線
+        if (q['id'] + 1) % 5 == 0 and (q['id'] + 1) != len(questions_data):
+            st.markdown("<hr style='margin: 30px 0; border-top: 1px solid #eee;'>", unsafe_allow_html=True)
+        else:
+            st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # 送信ボタン（中央寄せ）
+    _, center_col, _ = st.columns([1, 2, 1])
+    with center_col:
+        if st.button("診断結果を見る ＞", type="primary", use_container_width=True):
+            st.session_state.finished = True
+            st.rerun()
 
 if __name__ == "__main__":
     main()
