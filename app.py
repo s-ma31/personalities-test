@@ -263,25 +263,6 @@ if 'initialized_once' not in st.session_state:
     st.session_state.finished = False
     st.session_state.answers = {i: 0 for i in range(len(questions_data))}
 
-# デバッグ表示（最初の数問のstateを確認）
-with st.sidebar.expander("Debug: state", expanded=False):
-    preview_answers = [(i, st.session_state.answers.get(i, 0)) for i in range(min(10, len(questions_data)))]
-    st.write({f"Q{i+1}": v for i, v in preview_answers})
-    st.write({"finished": st.session_state.get("finished"), "gender": st.session_state.get("gender_input")})
-    st.write({"keys": list(st.session_state.keys())})
-    # 現在answersベースでの素点確認
-    score_debug = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
-    for q in questions_data:
-        score_debug[q["axis"]] += st.session_state.answers.get(q['id'], 0) * q["weight"]
-    st.write({"score_raw": score_debug})
-
-# セッション全消去ボタン（異常キャッシュリセット用）
-with st.sidebar:
-    if st.button("Reset session (hard)"):
-        for k in list(st.session_state.keys()):
-            del st.session_state[k]
-        st.rerun()
-
 def calculate_result():
     # answersを正規化（不正値は0）
     for q in questions_data:
@@ -561,3 +542,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
