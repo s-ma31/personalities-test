@@ -421,13 +421,14 @@ def send_result_email(to_email, result_type, details, gender, user_name, csv_dat
     csv_attachment = MIMEBase('application', 'octet-stream')
     csv_attachment.set_payload(csv_data)
     encoders.encode_base64(csv_attachment)
-    # 日本語ファイル名をASCIIセーフに変換（日本語はアンダースコアに置換）
-    ascii_name = ''.join(c if c.isascii() and c.isalnum() else '_' for c in user_name) if user_name else 'user'
-    csv_filename = f'personality_{ascii_name}_{result_type}.csv'
+    # 日本語ファイル名をRFC 2231形式でエンコード
+    from urllib.parse import quote
+    csv_filename = f'personality_{user_name}_{result_type}.csv' if user_name else f'personality_user_{result_type}.csv'
+    encoded_filename = quote(csv_filename, safe='')
     csv_attachment.add_header(
         'Content-Disposition',
         'attachment',
-        filename=csv_filename
+        filename=('utf-8', '', csv_filename)
     )
     msg.attach(csv_attachment)
     
