@@ -7,6 +7,8 @@ import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 from pathlib import Path
 
 # ==========================================
@@ -262,6 +264,8 @@ if 'answers' not in st.session_state:
     st.session_state.answers = {i: 0 for i in range(len(questions_data))}
 if 'gender_input' not in st.session_state:
     st.session_state.gender_input = "回答しない"
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = ""
 if 'current_page' not in st.session_state:
     st.session_state.current_page = 0
 
@@ -344,7 +348,7 @@ def generate_ai_context(result_type, details, gender):
 # ==========================================
 # メール送信機能
 # ==========================================
-def send_result_email(to_email, result_type, details, gender):
+def send_result_email(to_email, result_type, details, gender, user_name, csv_data):
     """
     診断結果をメールで送信する
     Gmail SMTP設定を使用
@@ -371,6 +375,9 @@ def send_result_email(to_email, result_type, details, gender):
     if not SENDER_EMAIL or not SENDER_PASSWORD:
         return False, "メール設定が見つかりません。環境変数 SENDER_EMAIL / SENDER_PASSWORD を設定してください"
     
+    # ユーザー名の表示処理
+    display_name = user_name if user_name else "未入力"
+    
     # メール本文を作成
     traits_text = ""
     trait_labels = {
@@ -391,22 +398,33 @@ def send_result_email(to_email, result_type, details, gender):
 【診断結果】
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-■ あなたの性格タイプ: {result_type}
+■ 回答者: {display_name}
+■ 性格タイプ: {result_type}
 ■ 性別: {gender}
 
 ■ 詳細スコア:
 {traits_text}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+詳細データはCSVファイルをご確認ください。
 このメールは性格タイプ診断アプリから自動送信されました。
 """
     
     # MIMEメッセージを作成
     msg = MIMEMultipart()
-    msg['Subject'] = f'【性格タイプ診断結果】{result_type}'
+    msg['Subject'] = f'【性格タイプ診断結果】{display_name}さん: {result_type}'
     msg['From'] = SENDER_EMAIL
     msg['To'] = to_email
     msg.attach(MIMEText(body, 'plain', 'utf-8'))
+    
+    # CSVを添付ファイルとして追加
+    csv_attachment = MIMEBase('application', 'octet-stream')
+    csv_attachment.set_payload(csv_data)
+    encoders.encode_base64(csv_attachment)
+    safe_name = user_name.replace(' ', '_') if user_name else 'user'
+    csv_filename = f'personality_{safe_name}_{result_type}.csv'
+    csv_attachment.add_header('Content-Disposition', f'attachment; filename="{csv_filename}"')
+    msg.attach(csv_attachment)
     
     try:
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
@@ -535,8 +553,9 @@ def render_result():
 
     st.markdown("---")
     
+    user_name = st.session_state.get("user_name", "")
     csv_data = {
-        "User_ID": ["User_001"],
+        "User_Name": [user_name if user_name else "未入力"],
         "Result_Type": [result_type],
         "Gender": [gender],
         "AI_Prompt_JSON": [ai_context]
@@ -552,20 +571,25 @@ def render_result():
     csv = df.to_csv(index=False).encode('utf-8-sig')
 
     st.markdown("### 📥 データのダウンロード")
-    st.download_button("診断結果CSVをダウンロード", data=csv, file_name=f'personality_{result_type}.csv', mime='text/csv')
+    safe_name = user_name.replace(' ', '_') if user_name else 'user'
+    st.download_button("診断結果CSVをダウンロード", data=csv, file_name=f'personality_{safe_name}_{result_type}.csv', mime='text/csv')
     
     # メール送信セクション
     st.markdown("### 📧 結果をメールで送信")
     recipient_email = "soma_yamashita@jp.honda"
     st.info(f"送信先: {recipient_email}")
+    st.info(f"回答者: {user_name if user_name else '未入力'}")
     
     if st.button("📧 診断結果をメールで送信", type="primary", use_container_width=True):
-        with st.spinner("送信中..."):
-            success, message = send_result_email(recipient_email, result_type, details, gender)
-            if success:
-                st.success(message)
-            else:
-                st.error(message)
+        if not user_name:
+            st.error("お名前を入力してください。最初からやり直して、お名前を入力してから診断してください。")
+        else:
+            with st.spinner("送信中..."):
+                success, message = send_result_email(recipient_email, result_type, details, gender, user_name, csv)
+                if success:
+                    st.success(message)
+                else:
+                    st.error(message)
     
     st.markdown("---")
     
@@ -587,9 +611,19 @@ def main():
     
     st.info("以下の60問の質問に対し、あなたの感覚に最も近いものを選択してください。")
     
-    # 性別選択
+    # 基本情報入力
     st.markdown("<div class='gender-section'>", unsafe_allow_html=True)
     st.markdown("### 👤 基本情報")
+    
+    # ユーザー名入力
+    st.session_state.user_name = st.text_input(
+        "お名前（必須）",
+        value=st.session_state.user_name,
+        placeholder="例: 山田太郎",
+        key="user_name_input"
+    )
+    
+    # 性別選択
     st.session_state.gender_input = st.radio(
         "性別（任意）", 
         ["男性", "女性", "その他", "回答しない"], 
