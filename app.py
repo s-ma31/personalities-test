@@ -3,6 +3,10 @@ import pandas as pd
 import json
 import datetime
 import math
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from pathlib import Path
 
 # ==========================================
@@ -337,6 +341,86 @@ def generate_ai_context(result_type, details, gender):
     }
     return json.dumps(prompt_data, ensure_ascii=False)
 
+# ==========================================
+# メール送信機能
+# ==========================================
+def send_result_email(to_email, result_type, details, gender):
+    """
+    診断結果をメールで送信する
+    Microsoft 365 SMTP設定を使用
+    """
+    # SMTP設定
+    SMTP_SERVER = "smtp.office365.com"
+    SMTP_PORT = 587
+    
+    # 送信元メールアドレスとパスワード
+    # 優先順位: 1. Streamlit secrets  2. 環境変数
+    def get_secret(key):
+        # Streamlit secretsから取得を試行
+        try:
+            if key in st.secrets:
+                return st.secrets[key]
+        except:
+            pass
+        # 環境変数から取得
+        return os.environ.get(key)
+    
+    SENDER_EMAIL = get_secret("SENDER_EMAIL")
+    SENDER_PASSWORD = get_secret("SENDER_PASSWORD")
+    
+    if not SENDER_EMAIL or not SENDER_PASSWORD:
+        return False, "メール設定が見つかりません。環境変数 SENDER_EMAIL / SENDER_PASSWORD を設定してください"
+    
+    # メール本文を作成
+    traits_text = ""
+    trait_labels = {
+        "Mind": "意識",
+        "Energy": "エネルギー",
+        "Nature": "気質",
+        "Tactics": "戦術",
+        "Identity": "アイデンティティ"
+    }
+    for key, val in details.items():
+        label = trait_labels.get(key, key)
+        traits_text += f"  {label}: {val['trait']} ({val['pct']}%)\n"
+    
+    body = f"""
+性格タイプ診断の結果をお知らせします。
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【診断結果】
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+■ あなたの性格タイプ: {result_type}
+■ 性別: {gender}
+
+■ 詳細スコア:
+{traits_text}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+このメールは性格タイプ診断アプリから自動送信されました。
+"""
+    
+    # MIMEメッセージを作成
+    msg = MIMEMultipart()
+    msg['Subject'] = f'【性格タイプ診断結果】{result_type}'
+    msg['From'] = SENDER_EMAIL
+    msg['To'] = to_email
+    msg.attach(MIMEText(body, 'plain', 'utf-8'))
+    
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.send_message(msg)
+        return True, "メールを送信しました！"
+    except smtplib.SMTPAuthenticationError:
+        return False, "認証エラー: メールアドレスまたはパスワードを確認してください"
+    except smtplib.SMTPException as e:
+        return False, f"送信エラー: {str(e)}"
+    except Exception as e:
+        return False, f"エラーが発生しました: {str(e)}"
+
 # --- 16タイプ分類（名称のみ） ---
 def get_type_info(result_type):
     base_type = result_type.split("-")[0]
@@ -470,6 +554,21 @@ def render_result():
     st.markdown("### 📥 データのダウンロード")
     st.download_button("診断結果CSVをダウンロード", data=csv, file_name=f'personality_{result_type}.csv', mime='text/csv')
     
+    # メール送信セクション
+    st.markdown("### 📧 結果をメールで送信")
+    recipient_email = "soma_yamashita@jp.honda"
+    st.info(f"送信先: {recipient_email}")
+    
+    if st.button("📧 診断結果をメールで送信", type="primary", use_container_width=True):
+        with st.spinner("送信中..."):
+            success, message = send_result_email(recipient_email, result_type, details, gender)
+            if success:
+                st.success(message)
+            else:
+                st.error(message)
+    
+    st.markdown("---")
+    
     if st.button("最初からやり直す", use_container_width=True):
         st.session_state.answers = {i: 0 for i in range(len(questions_data))}
         st.session_state.finished = False
@@ -571,4 +670,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
