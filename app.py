@@ -347,10 +347,10 @@ def generate_ai_context(result_type, details, gender):
 def send_result_email(to_email, result_type, details, gender):
     """
     診断結果をメールで送信する
-    Microsoft 365 SMTP設定を使用
+    Gmail SMTP設定を使用
     """
-    # SMTP設定
-    SMTP_SERVER = "smtp.office365.com"
+    # SMTP設定（Gmail）
+    SMTP_SERVER = "smtp.gmail.com"
     SMTP_PORT = 587
     
     # 送信元メールアドレスとパスワード
