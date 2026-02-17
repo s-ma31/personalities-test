@@ -559,7 +559,22 @@ def render_result():
 
     st.markdown("---")
     
-    user_name = st.session_state.get("user_name", "")
+    # メール送信セクション
+    st.markdown("### 📧 結果をメールで送信")
+    recipient_email = "soma@sdxai.jp.honda"
+    st.info(f"送信先: {recipient_email}")
+    
+    # 回答者名入力（結果ページでも入力・編集可能）
+    user_name = st.text_input(
+        "回答者名（必須）",
+        value=st.session_state.get("user_name", ""),
+        placeholder="例: 本田宗一郎",
+        key="user_name_result"
+    )
+    # 入力値をsession_stateに反映
+    st.session_state.user_name = user_name
+    
+    # CSVデータ生成（入力された名前を使用）
     csv_data = {
         "User_Name": [user_name if user_name else "未入力"],
         "Result_Type": [result_type],
@@ -575,20 +590,10 @@ def render_result():
         csv_data[f"Q{qid+1}"] = [val]
     df = pd.DataFrame(csv_data)
     csv = df.to_csv(index=False).encode('utf-8-sig')
-
-    st.markdown("### 📥 データのダウンロード")
-    safe_name = user_name.replace(' ', '_') if user_name else 'user'
-    st.download_button("診断結果CSVをダウンロード", data=csv, file_name=f'personality_{safe_name}_{result_type}.csv', mime='text/csv')
-    
-    # メール送信セクション
-    st.markdown("### 📧 結果をメールで送信")
-    recipient_email = "soma@sdxai.jp.honda"
-    st.info(f"送信先: {recipient_email}")
-    st.info(f"回答者: {user_name if user_name else '未入力'}")
     
     if st.button("📧 診断結果をメールで送信", type="primary", use_container_width=True):
         if not user_name:
-            st.error("お名前を入力してください。最初からやり直して、お名前を入力してから診断してください。")
+            st.error("お名前を入力してください。")
         else:
             with st.spinner("送信中..."):
                 success, message = send_result_email(recipient_email, result_type, details, gender, user_name, csv)
@@ -596,6 +601,10 @@ def render_result():
                     st.success(message)
                 else:
                     st.error(message)
+
+    st.markdown("### 📥 データのダウンロード")
+    safe_name = user_name.replace(' ', '_') if user_name else 'user'
+    st.download_button("診断結果CSVをダウンロード", data=csv, file_name=f'personality_{safe_name}_{result_type}.csv', mime='text/csv')
     
     st.markdown("---")
     
@@ -710,4 +719,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
