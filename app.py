@@ -421,9 +421,14 @@ def send_result_email(to_email, result_type, details, gender, user_name, csv_dat
     csv_attachment = MIMEBase('application', 'octet-stream')
     csv_attachment.set_payload(csv_data)
     encoders.encode_base64(csv_attachment)
-    safe_name = user_name.replace(' ', '_') if user_name else 'user'
-    csv_filename = f'personality_{safe_name}_{result_type}.csv'
-    csv_attachment.add_header('Content-Disposition', f'attachment; filename="{csv_filename}"')
+    # 日本語ファイル名をASCIIセーフに変換（日本語はアンダースコアに置換）
+    ascii_name = ''.join(c if c.isascii() and c.isalnum() else '_' for c in user_name) if user_name else 'user'
+    csv_filename = f'personality_{ascii_name}_{result_type}.csv'
+    csv_attachment.add_header(
+        'Content-Disposition',
+        'attachment',
+        filename=csv_filename
+    )
     msg.attach(csv_attachment)
     
     try:
@@ -576,7 +581,7 @@ def render_result():
     
     # メール送信セクション
     st.markdown("### 📧 結果をメールで送信")
-    recipient_email = "soma@sdxai.jp.honda"
+    recipient_email = "soma_yamashita@jp.honda"
     st.info(f"送信先: {recipient_email}")
     st.info(f"回答者: {user_name if user_name else '未入力'}")
     
@@ -704,4 +709,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
