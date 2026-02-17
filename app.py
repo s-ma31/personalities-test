@@ -582,7 +582,7 @@ def render_result():
     
     # メール送信セクション
     st.markdown("### 📧 結果をメールで送信")
-    recipient_email = "soma_yamashita@jp.honda"
+    recipient_email = "soma@sdxai.jp.honda"
     st.info(f"送信先: {recipient_email}")
     st.info(f"回答者: {user_name if user_name else '未入力'}")
     
@@ -625,7 +625,7 @@ def main():
     st.session_state.user_name = st.text_input(
         "お名前（必須）",
         value=st.session_state.user_name,
-        placeholder="例: 山田太郎",
+        placeholder="例: 本田宗一郎",
         key="user_name_input"
     )
     
@@ -710,3 +710,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
