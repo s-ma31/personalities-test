@@ -561,7 +561,7 @@ def render_result():
     
     # メール送信セクション
     st.markdown("### 📧 結果をメールで送信")
-    recipient_email = "soma@sdxai.jp.honda"
+    recipient_email = "soma_yamashita@jp.honda"
     st.info(f"送信先: {recipient_email}")
     
     # 回答者名入力（結果ページでも入力・編集可能）
@@ -719,3 +719,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
