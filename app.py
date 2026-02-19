@@ -176,35 +176,35 @@ st.markdown("""
 # 1. 質問データベース（バランス調整済み: 60問）
 # ==========================================
 questions_data = [
-    # --- Mind: 意識 (E:外向 vs I:内向) ---
-    {"text": "定期的に新しい交友関係を築いている", "axis": "Mind", "weight": 1},
-    {"text": "事前の約束がなくても、興味を持った相手に自分から声をかけられる", "axis": "Mind", "weight": 1},
-    {"text": "チームで取り組む作業が好きだ", "axis": "Mind", "weight": 1},
-    {"text": "一人で過ごすより、誰かと一緒にいるほうが心地よい", "axis": "Mind", "weight": 1},
-    {"text": "周囲の友人は、自分を活発で社交的だと評価するだろう", "axis": "Mind", "weight": 1},
-    {"text": "初対面でも、比較的すぐに相手と意思疎通ができる", "axis": "Mind", "weight": 1},
-    {"text": "人脈づくりや初対面の人への自己アピールは、かなり負担に感じる", "axis": "Mind", "weight": -1},
-    {"text": "集団で行う活動より、単独での趣味のほうが性に合っている", "axis": "Mind", "weight": -1},
-    {"text": "社交の場では、自分から名乗るより相手の出方を待つことが多い", "axis": "Mind", "weight": -1},
-    {"text": "電話でのやり取りは避けがちだ", "axis": "Mind", "weight": -1},
-    {"text": "ほぼ一人で進める仕事に魅力を感じる", "axis": "Mind", "weight": -1},
-    {"text": "人が多く活気のある場所に長時間いると、疲れを感じやすい", "axis": "Mind", "weight": -1},
+    # --- Energy: エネルギー (E:外向 vs I:内向) ---
+    {"text": "定期的に新しい交友関係を築いている", "axis": "Energy", "weight": 1},
+    {"text": "事前の約束がなくても、興味を持った相手に自分から声をかけられる", "axis": "Energy", "weight": 1},
+    {"text": "チームで取り組む作業が好きだ", "axis": "Enegy", "weight": 1},
+    {"text": "一人で過ごすより、誰かと一緒にいるほうが心地よい", "axis": "Enegy", "weight": 1},
+    {"text": "周囲の友人は、自分を活発で社交的だと評価するだろう", "axis": "Enegy", "weight": 1},
+    {"text": "初対面でも、比較的すぐに相手と意思疎通ができる", "axis": "Enegy", "weight": 1},
+    {"text": "人脈づくりや初対面の人への自己アピールは、かなり負担に感じる", "axis": "Enegy", "weight": -1},
+    {"text": "集団で行う活動より、単独での趣味のほうが性に合っている", "axis": "Enegy", "weight": -1},
+    {"text": "社交の場では、自分から名乗るより相手の出方を待つことが多い", "axis": "Enegy", "weight": -1},
+    {"text": "電話でのやり取りは避けがちだ", "axis": "Enegy", "weight": -1},
+    {"text": "ほぼ一人で進める仕事に魅力を感じる", "axis": "Enegy", "weight": -1},
+    {"text": "人が多く活気のある場所に長時間いると、疲れを感じやすい", "axis": "Enegy", "weight": -1},
 
-    # --- Energy: エネルギー (N:直感 vs S:現実) ---
-    {"text": "単純で分かりやすい発想より、複雑で新規性のある発想に魅力を感じる", "axis": "Energy", "weight": 1},
-    {"text": "未経験のやり方や新しい手法に挑戦するのは楽しい", "axis": "Energy", "weight": 1},
-    {"text": "倫理的な問題について考え、議論するのが好きだ", "axis": "Energy", "weight": 1},
-    {"text": "文章を書くなどの創造的な表現活動に惹かれる", "axis": "Energy", "weight": 1},
-    {"text": "馴染みのない発想や視点を探るのは楽しい", "axis": "Energy", "weight": 1},
-    {"text": "決められた手順の作業より、創造的な解決を考える仕事が好きだ", "axis": "Energy", "weight": 1},
-    {"text": "創作物の多様な解釈について議論することには関心がない", "axis": "Energy", "weight": -1},
-    {"text": "創作として架空の物語を書く仕事は想像しにくい", "axis": "Energy", "weight": -1},
-    {"text": "議論が理論一辺倒になると、興味を失いやすい", "axis": "Energy", "weight": -1},
-    {"text": "将来世界についての理論的な議論には関心が薄い", "axis": "Energy", "weight": -1},
-    {"text": "抽象的・哲学的な問題を深く考えるのは無駄だと思う", "axis": "Energy", "weight": -1},
-    {"text": "新しい刺激よりも、慣れ親しんだルーチンの方が落ち着く", "axis": "Energy", "weight": -1},
+    # --- Mind: 意識 (N:直感 vs S:現実) ---
+    {"text": "単純で分かりやすい発想より、複雑で新規性のある発想に魅力を感じる", "axis": "Mind", "weight": 1},
+    {"text": "未経験のやり方や新しい手法に挑戦するのは楽しい", "axis": "Mind", "weight": 1},
+    {"text": "倫理的な問題について考え、議論するのが好きだ", "axis": "Mind", "weight": 1},
+    {"text": "文章を書くなどの創造的な表現活動に惹かれる", "axis": "Mind", "weight": 1},
+    {"text": "馴染みのない発想や視点を探るのは楽しい", "axis": "Mind", "weight": 1},
+    {"text": "決められた手順の作業より、創造的な解決を考える仕事が好きだ", "axis": "Mind", "weight": 1},
+    {"text": "創作物の多様な解釈について議論することには関心がない", "axis": "Mind", "weight": -1},
+    {"text": "創作として架空の物語を書く仕事は想像しにくい", "axis": "Mind", "weight": -1},
+    {"text": "議論が理論一辺倒になると、興味を失いやすい", "axis": "Mind", "weight": -1},
+    {"text": "将来世界についての理論的な議論には関心が薄い", "axis": "Mind", "weight": -1},
+    {"text": "抽象的・哲学的な問題を深く考えるのは無駄だと思う", "axis": "Mind", "weight": -1},
+    {"text": "新しい刺激よりも、慣れ親しんだルーチンの方が落ち着く", "axis": "Mind", "weight": -1},
 
-    # --- Nature: 気質 (F:道理 vs T:論理) ---
+    # --- Nature: 性質 (F:感情 vs T:思考) ---
     {"text": "事実を積み上げた議論より、感情に訴える内容のほうが心を動かされる", "axis": "Nature", "weight": 1},
     {"text": "数値やデータより、人の体験談や感情のほうが強く印象に残る", "axis": "Nature", "weight": 1},
     {"text": "率直さよりも、相手への配慮を優先する", "axis": "Nature", "weight": 1},
@@ -284,8 +284,8 @@ def calculate_result():
             val = 0
         st.session_state.answers[qid] = int(val)
 
-    scores = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
-    max_scores = {"Mind": 0, "Energy": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
+    scores = {"Energy": 0, "Mind": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
+    max_scores = {"Energy": 0, "Mind": 0, "Nature": 0, "Tactics": 0, "Identity": 0}
 
     for q in questions_data:
         qid = q['id']
@@ -315,15 +315,15 @@ def calculate_result():
 
     letter, pct = axis_letter_and_pct(scores["Mind"], max_scores["Mind"], "E", "I")
     result_type += letter
-    details["Mind"] = {"trait": "外向型" if letter == "E" else "内向型", "pct": pct, "letter": letter}
+    details["Energy"] = {"trait": "外向型" if letter == "E" else "内向型", "pct": pct, "letter": letter}
 
     letter, pct = axis_letter_and_pct(scores["Energy"], max_scores["Energy"], "N", "S")
     result_type += letter
-    details["Energy"] = {"trait": "直感型" if letter == "N" else "現実型", "pct": pct, "letter": letter}
+    details["Mind"] = {"trait": "直感型" if letter == "N" else "現実型", "pct": pct, "letter": letter}
 
     letter, pct = axis_letter_and_pct(scores["Nature"], max_scores["Nature"], "F", "T")
     result_type += letter
-    details["Nature"] = {"trait": "道理型" if letter == "F" else "論理型", "pct": pct, "letter": letter}
+    details["Nature"] = {"trait": "感情型" if letter == "F" else "思考型", "pct": pct, "letter": letter}
 
     letter, pct = axis_letter_and_pct(scores["Tactics"], max_scores["Tactics"], "J", "P")
     result_type += letter
@@ -381,9 +381,9 @@ def send_result_email(to_email, result_type, details, gender, user_name, csv_dat
     # メール本文を作成
     traits_text = ""
     trait_labels = {
-        "Mind": "意識",
         "Energy": "エネルギー",
-        "Nature": "気質",
+        "Mind": "意識",
+        "Nature": "性質",
         "Tactics": "戦術",
         "Identity": "アイデンティティ"
     }
@@ -551,9 +551,9 @@ def render_result():
         "Identity": "#EF5350"   # red
     }
     
-    display_progress_bar("意識 (Mind)", "外向型 (E)", "内向型 (I)", details["Mind"]["pct"], details["Mind"]["letter"] == "E", color=colors["Mind"])
-    display_progress_bar("エネルギー (Energy)", "直感型 (N)", "現実型 (S)", details["Energy"]["pct"], details["Energy"]["letter"] == "N", color=colors["Energy"])
-    display_progress_bar("気質 (Nature)", "道理型 (F)", "論理型 (T)", details["Nature"]["pct"], details["Nature"]["letter"] == "F", color=colors["Nature"])
+    display_progress_bar("エネルギー (Energy)", "外向型 (E)", "内向型 (I)", details["Mind"]["pct"], details["Mind"]["letter"] == "E", color=colors["Energy"])
+    display_progress_bar("意識 (Mind)", "直感型 (N)", "現実型 (S)", details["Energy"]["pct"], details["Energy"]["letter"] == "N", color=colors["Mind"])
+    display_progress_bar("性質 (Nature)", "道理型 (F)", "論理型 (T)", details["Nature"]["pct"], details["Nature"]["letter"] == "F", color=colors["Nature"])
     display_progress_bar("戦術 (Tactics)", "計画型 (J)", "探索型 (P)", details["Tactics"]["pct"], details["Tactics"]["letter"] == "J", color=colors["Tactics"])
     display_progress_bar("アイデンティティ (Identity)", "自己主張型 (A)", "慎重型 (T)", details["Identity"]["pct"], details["Identity"]["letter"] == "A", color=colors["Identity"])
 
@@ -719,3 +719,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
