@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import pandas as pd
 import json
 import datetime
@@ -269,8 +268,6 @@ if 'user_name' not in st.session_state:
     st.session_state.user_name = ""
 if 'current_page' not in st.session_state:
     st.session_state.current_page = 0
-if 'scroll_to_top' not in st.session_state:
-    st.session_state.scroll_to_top = False
 
 # 初期化フラグを使い、セッション開始時に強制的に全問0でリセット
 if 'initialized_once' not in st.session_state:
@@ -619,18 +616,6 @@ def render_result():
 
 
 def main():
-    # ページトップスクロール処理
-    if st.session_state.get('scroll_to_top', False):
-        components.html(
-            """
-            <script>
-                window.parent.document.querySelector('section.main').scrollTo(0, 0);
-            </script>
-            """,
-            height=0
-        )
-        st.session_state.scroll_to_top = False
-    
     # 完了フラグが立っていたら結果を表示して終了
     if st.session_state.finished:
         render_result()
@@ -717,7 +702,6 @@ def main():
     with nav_right:
         if st.button("次へ ＞", disabled=current_page >= total_pages - 1, use_container_width=True):
             st.session_state.current_page = min(total_pages - 1, current_page + 1)
-            st.session_state.scroll_to_top = True
             st.rerun()
 
     if current_page == total_pages - 1:
