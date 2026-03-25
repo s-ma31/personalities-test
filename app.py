@@ -191,14 +191,14 @@ questions_data = [
     {"text": "人が多く活気のある場所に長時間いると、疲れを感じやすい", "axis": "Mind", "weight": -1},
 
     # --- Energy: エネルギー (N:直感 vs S:現実) ---
-    {"text": "単純で分かりやすい発想より、複雑で新規性のある発想に魅力を感じる", "axis": "Energy", "weight": 1},
-    {"text": "未経験のやり方や新しい手法に挑戦するのは楽しい", "axis": "Energy", "weight": 1},
+    {"text": "シンプルで分かりやすいアイデアよりも、複雑で斬新な発想に魅力を感じる", "axis": "Energy", "weight": 1},
+    {"text": "未知の方法や新しい手法に挑戦するのは楽しい", "axis": "Energy", "weight": 1},
     {"text": "倫理的な問題について考え、議論するのが好きだ", "axis": "Energy", "weight": 1},
     {"text": "文章を書くなどの創造的な表現活動に惹かれる", "axis": "Energy", "weight": 1},
     {"text": "馴染みのない発想や視点を探るのは楽しい", "axis": "Energy", "weight": 1},
     {"text": "決められた手順の作業より、創造的な解決を考える仕事が好きだ", "axis": "Energy", "weight": 1},
-    {"text": "創作物の多様な解釈について議論することには関心がない", "axis": "Energy", "weight": -1},
-    {"text": "創作として架空の物語を書く仕事は想像しにくい", "axis": "Energy", "weight": -1},
+    {"text": "1つの作品に対して、人それぞれの解釈を議論することには興味がない", "axis": "Energy", "weight": -1},
+    {"text": "架空の物語を創作する仕事は想像しにくい", "axis": "Energy", "weight": -1},
     {"text": "議論が理論一辺倒になると、興味を失いやすい", "axis": "Energy", "weight": -1},
     {"text": "将来世界についての理論的な議論には関心が薄い", "axis": "Energy", "weight": -1},
     {"text": "抽象的・哲学的な問題を深く考えるのは無駄だと思う", "axis": "Energy", "weight": -1},
