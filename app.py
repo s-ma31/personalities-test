@@ -432,14 +432,18 @@ def send_result_email(to_email, result_type, details, gender, user_name, csv_dat
     )
     msg.attach(csv_attachment)
     
+    # 前後の空白を除去
+    SENDER_EMAIL = SENDER_EMAIL.strip()
+    SENDER_PASSWORD = SENDER_PASSWORD.strip()
+    
     try:
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.starttls()
             server.login(SENDER_EMAIL, SENDER_PASSWORD)
             server.send_message(msg)
         return True, "メールを送信しました！"
-    except smtplib.SMTPAuthenticationError:
-        return False, "認証エラー: メールアドレスまたはパスワードを確認してください"
+    except smtplib.SMTPAuthenticationError as e:
+        return False, f"認証エラー: {e.smtp_code} {e.smtp_error}"
     except smtplib.SMTPException as e:
         return False, f"送信エラー: {str(e)}"
     except Exception as e:
@@ -599,6 +603,7 @@ def render_result():
                 success, message = send_result_email(recipient_email, result_type, details, gender, user_name, csv)
                 if success:
                     st.success(message)
+                    st.info("📬 メールはセキュリティフィルターの処理により、届くまでに数分かかる場合があります。しばらくお待ちください。")
                 else:
                     st.error(message)
 
